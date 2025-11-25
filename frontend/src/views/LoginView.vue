@@ -21,7 +21,7 @@ const login = async () => {
         <div class="card shadow-lg border-0 w-100" style="max-width: 400px;">
             <div class="card-header bg-primary text-white text-center py-4">
                 <div class="mb-2">
-                    <i class="bi bi-life-preserver display-4"></i>
+                    <i class="bi bi-mortarboard-fill display-4"></i>
                 </div>
                 <h4 class="mb-0 fw-bold">Helpdesk</h4>
                 <small>Korkyt Ata University</small>

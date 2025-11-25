@@ -23,7 +23,7 @@ const toggleMenu = () => {
     <nav class="navbar navbar-expand-lg mb-4 shadow-sm" v-if="authStore.isAuthenticated">
       <div class="container">
         <a class="navbar-brand fw-bold d-flex align-items-center text-truncate" href="#" style="max-width: 70%;">
-            <i class="bi bi-life-preserver me-2 fs-4"></i>
+            <i class="bi bi-mortarboard-fill me-2 fs-4"></i>
             <span class="text-truncate">Helpdesk Коркыт Ата</span>
         </a>
         
