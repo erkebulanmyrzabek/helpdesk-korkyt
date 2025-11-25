@@ -1,0 +1,41 @@
+# Python / Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+bin/
+include/
+lib/
+lib64/
+local/
+share/
+*.sqlite3
+*.log
+*.pot
+*.mo
+.env
+.DS_Store
+media/ # If user-uploaded media is not to be version controlled
+
+# Node / Vue
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.idea/
+.vscode/
+*.local
+*.env.local
+*.env.*.local
+*.log*
+
+# Operating System
+.DS_Store
+.Trash
+Thumbs.db
+
