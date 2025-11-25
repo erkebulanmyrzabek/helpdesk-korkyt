@@ -62,7 +62,8 @@ onMounted(fetchTickets)
 <template>
     <div>
         <div class="row mb-4">
-            <div class="col-md-6">
+            <!-- Свободные заявки -->
+            <div class="col-md-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white text-primary border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-inbox me-2"></i>Свободные заявки</h5>
@@ -80,10 +81,20 @@ onMounted(fetchTickets)
                                     <small class="text-muted"><i class="bi bi-person me-1"></i>{{ ticket.author_username }}</small>
                                 </div>
                                 <p class="mb-2 text-secondary small">{{ ticket.description }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
-                                        <i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}
-                                    </small>
+                                
+                                <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-clock me-1"></i>{{ new Date(ticket.created_at).toLocaleString() }}</span>
+                                </div>
+
+                                <div v-if="ticket.image" class="mb-3">
+                                     <small class="text-muted d-block mb-1 fw-bold"><i class="bi bi-image me-1"></i>Фото от учителя:</small>
+                                    <a :href="ticket.image" target="_blank">
+                                        <img :src="ticket.image" class="img-thumbnail" style="max-height: 150px; object-fit: cover;">
+                                    </a>
+                                </div>
+
+                                <div class="d-flex justify-content-end align-items-center mt-2">
                                     <button class="btn btn-sm btn-primary px-3" @click="takeTicket(ticket.id)">
                                         Взять в работу
                                     </button>
@@ -94,10 +105,11 @@ onMounted(fetchTickets)
                 </div>
             </div>
             
-             <div class="col-md-6">
+            <!-- Мои активные задачи -->
+            <div class="col-md-4">
                 <div class="card shadow-sm h-100 border-primary border-opacity-25">
                     <div class="card-header bg-primary text-white border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Мои активные задачи</h5>
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>В работе</h5>
                         <span class="badge bg-white text-primary rounded-pill">{{ myTickets.length }}</span>
                     </div>
                     <div class="card-body p-0">
@@ -112,6 +124,18 @@ onMounted(fetchTickets)
                                     <span class="badge bg-warning text-dark">В работе</span>
                                 </div>
                                 <p class="mb-2 small text-secondary">{{ ticket.description }}</p>
+                                
+                                <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-person me-1"></i>{{ ticket.author_username }}</span>
+                                </div>
+
+                                <div v-if="ticket.image" class="mb-3">
+                                     <small class="text-muted d-block mb-1 fw-bold"><i class="bi bi-image me-1"></i>Фото от учителя:</small>
+                                    <a :href="ticket.image" target="_blank">
+                                        <img :src="ticket.image" class="img-thumbnail" style="max-height: 150px; object-fit: cover;">
+                                    </a>
+                                </div>
                                 
                                 <div v-if="reportData.id === ticket.id" class="mt-3 card card-body border-success shadow-sm">
                                     <h6 class="card-title text-success"><i class="bi bi-flag me-2"></i>Завершение работы</h6>
@@ -131,6 +155,46 @@ onMounted(fetchTickets)
                                 <button v-else class="btn btn-sm btn-outline-success w-100 mt-2" @click="prepareReport(ticket)">
                                     <i class="bi bi-check-lg me-1"></i>Завершить задачу
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- История выполненных -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white text-success border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>История</h5>
+                        <span class="badge bg-success rounded-pill">{{ completedTickets.length }}</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div v-if="completedTickets.length === 0" class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-check display-4 d-block mb-2"></i>
+                            История пуста
+                        </div>
+                        <div v-else class="list-group list-group-flush">
+                            <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
+                                <div class="d-flex w-100 justify-content-between mb-1">
+                                    <h6 class="mb-1 fw-bold text-muted text-decoration-line-through">{{ ticket.title }}</h6>
+                                    <span class="badge bg-secondary">Выполнено</span>
+                                </div>
+                                <p class="mb-2 small text-muted">{{ ticket.description }}</p>
+                                <div class="d-flex flex-wrap gap-2 mb-2 text-muted small">
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-calendar-check me-1"></i>{{ new Date(ticket.updated_at).toLocaleDateString() }}</span>
+                                </div>
+                                
+                                <div v-if="ticket.report_comment || ticket.report_image" class="mt-2 p-2 bg-light rounded small">
+                                    <div v-if="ticket.report_comment" class="mb-1">
+                                        <i class="bi bi-chat-left-text me-1 text-success"></i> {{ ticket.report_comment }}
+                                    </div>
+                                    <div v-if="ticket.report_image">
+                                        <a :href="ticket.report_image" target="_blank" class="text-decoration-none">
+                                            <i class="bi bi-image me-1"></i>Смотреть отчет
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

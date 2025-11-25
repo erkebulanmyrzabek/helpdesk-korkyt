@@ -18,18 +18,18 @@ class IsAdmin(permissions.BasePermission):
         return request.user.is_authenticated and request.user.role == 'admin'
 
 class TicketViewSet(viewsets.ModelViewSet):
-    queryset = Ticket.objects.all()
+    queryset = Ticket.objects.all().order_by('-created_at')
     serializer_class = TicketSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         if user.role == 'teacher':
-            return Ticket.objects.filter(author=user)
+            return Ticket.objects.filter(author=user).order_by('-created_at')
         elif user.role == 'helpdesk':
-            return Ticket.objects.all() 
+            return Ticket.objects.all().order_by('-created_at')
         elif user.role == 'admin':
-            return Ticket.objects.all()
+            return Ticket.objects.all().order_by('-created_at')
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
@@ -73,7 +73,16 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action == 'create':
-            return [permissions.AllowAny()]
+            # Allow admin to create users (or allow any for registration if needed, but query implies admin creates them)
+            # Actually, `create` is POST /users/. If we want Admin only to create, we should restrict it.
+            # The previous code had AllowAny, let's restrict to IsAdmin for creation if user is authenticated, 
+            # OR AllowAny if it's a public registration (but query says "Admin adds teachers").
+            # Let's change it: Only Admin can create users via this API, OR we need a separate registration.
+            # Query: "сделать добавление хелпдесков и учителей... для админа"
+            # So we should probably restrict `create` to Admin only.
+            return [permissions.IsAuthenticated(), IsAdmin()]
+        if self.action in ['list', 'destroy']:
+             return [permissions.IsAuthenticated(), IsAdmin()]
         return [permissions.IsAuthenticated()]
 
     @action(detail=False, methods=['get'])
