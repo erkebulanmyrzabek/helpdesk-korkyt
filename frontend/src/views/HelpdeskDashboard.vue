@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import axios from '../axios'
 import { useAuthStore } from '../stores/auth'
 
@@ -11,6 +11,9 @@ const reportData = ref({
     image: null
 })
 const fileInputReport = ref(null)
+const currentTime = ref(new Date())
+
+let timerInterval = null
 
 const fetchTickets = async () => {
     const response = await axios.get('tickets/')
@@ -20,6 +23,34 @@ const fetchTickets = async () => {
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'open'))
 const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status !== 'done'))
 const completedTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'done'))
+
+// Функция для форматирования времени выполнения
+const formatDuration = (minutes) => {
+    if (!minutes && minutes !== 0) return '-'
+    if (minutes < 60) return `${minutes} мин`
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}ч ${mins}мин`
+}
+
+// Функция для вычисления времени работы в реальном времени
+const getWorkingTime = (ticket) => {
+    if (!ticket.started_at) return '0 сек'
+    
+    const started = new Date(ticket.started_at)
+    const now = currentTime.value
+    const diff = Math.floor((now - started) / 1000) // разница в секундах
+    
+    if (diff < 60) return `${diff} сек`
+    if (diff < 3600) {
+        const mins = Math.floor(diff / 60)
+        const secs = diff % 60
+        return `${mins} мин ${secs} сек`
+    }
+    const hours = Math.floor(diff / 3600)
+    const mins = Math.floor((diff % 3600) / 60)
+    return `${hours}ч ${mins} мин`
+}
 
 const takeTicket = async (id) => {
     try {
@@ -56,7 +87,19 @@ const submitReport = async () => {
     }
 }
 
-onMounted(fetchTickets)
+onMounted(() => {
+    fetchTickets()
+    // Обновляем время каждую секунду для таймера
+    timerInterval = setInterval(() => {
+        currentTime.value = new Date()
+    }, 1000)
+})
+
+onUnmounted(() => {
+    if (timerInterval) {
+        clearInterval(timerInterval)
+    }
+})
 </script>
 
 <template>
@@ -83,7 +126,7 @@ onMounted(fetchTickets)
                                 <p class="mb-2 text-secondary small">{{ ticket.description }}</p>
                                 
                                 <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
-                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus_name || ticket.corpus }}, {{ ticket.cabinet }}</span>
                                     <span><i class="bi bi-clock me-1"></i>{{ new Date(ticket.created_at).toLocaleString() }}</span>
                                 </div>
 
@@ -126,8 +169,21 @@ onMounted(fetchTickets)
                                 <p class="mb-2 small text-secondary">{{ ticket.description }}</p>
                                 
                                 <div class="d-flex flex-wrap gap-3 mb-2 text-muted small">
-                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus_name || ticket.corpus }}, {{ ticket.cabinet }}</span>
                                     <span><i class="bi bi-person me-1"></i>{{ ticket.author_username }}</span>
+                                </div>
+
+                                <!-- Таймер работы -->
+                                <div v-if="ticket.started_at" class="mb-3 p-2 bg-info bg-opacity-10 rounded border border-info border-opacity-25">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-bold text-info">
+                                            <i class="bi bi-stopwatch me-1"></i>Время работы:
+                                        </span>
+                                        <span class="badge bg-info text-white fs-6">{{ getWorkingTime(ticket) }}</span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Начато: {{ new Date(ticket.started_at).toLocaleString() }}
+                                    </small>
                                 </div>
 
                                 <div v-if="ticket.image" class="mb-3">
@@ -181,8 +237,18 @@ onMounted(fetchTickets)
                                 </div>
                                 <p class="mb-2 small text-muted">{{ ticket.description }}</p>
                                 <div class="d-flex flex-wrap gap-2 mb-2 text-muted small">
-                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus }}, {{ ticket.cabinet }}</span>
-                                    <span><i class="bi bi-calendar-check me-1"></i>{{ new Date(ticket.updated_at).toLocaleDateString() }}</span>
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ ticket.corpus_name || ticket.corpus }}, {{ ticket.cabinet }}</span>
+                                    <span><i class="bi bi-calendar-check me-1"></i>{{ new Date(ticket.completed_at || ticket.updated_at).toLocaleDateString() }}</span>
+                                </div>
+                                
+                                <!-- Время выполнения -->
+                                <div v-if="ticket.duration_minutes !== null && ticket.duration_minutes !== undefined" class="mb-2 p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-bold text-success">
+                                            <i class="bi bi-stopwatch-fill me-1"></i>Время выполнения:
+                                        </span>
+                                        <span class="badge bg-success text-white">{{ formatDuration(ticket.duration_minutes) }}</span>
+                                    </div>
                                 </div>
                                 
                                 <div v-if="ticket.report_comment || ticket.report_image" class="mt-2 p-2 bg-light rounded small">
