@@ -29,17 +29,29 @@ class Command(BaseCommand):
             warning_msg = 'EMAIL_HOST_PASSWORD not set. Skipping email check.'
             logger.warning(warning_msg)
             self.stdout.write(self.style.WARNING(warning_msg))
+            self.stdout.write(self.style.WARNING('⚠️  Установите EMAIL_HOST_PASSWORD в settings.py или через переменную окружения'))
             return
         
         try:
             # Connect to Gmail IMAP
             logger.info(f"[{datetime.now()}] Connecting to IMAP server: {imap_server}:{imap_port}")
-            self.stdout.write(f'Connecting to {imap_server}...')
+            self.stdout.write(f'Подключение к {imap_server}...')
             
             mail = imaplib.IMAP4_SSL(imap_server, imap_port)
-            mail.login(email_user, email_password)
+            
+            try:
+                mail.login(email_user, email_password)
+            except imaplib.IMAP4.error as auth_error:
+                error_msg = f'Ошибка аутентификации: {str(auth_error)}'
+                logger.error(f"[{datetime.now()}] {error_msg}")
+                self.stdout.write(self.style.ERROR(f'\n❌ {error_msg}'))
+                self.stdout.write(self.style.WARNING('\n📋 ВАЖНО: При включенной двухфакторной аутентификации нужен App Password!'))
+                self.stdout.write(self.style.WARNING('📖 Инструкция: См. EMAIL_SETUP_INSTRUCTIONS.md'))
+                self.stdout.write(self.style.WARNING('🔗 Создать App Password: https://myaccount.google.com/apppasswords'))
+                return
+            
             logger.info(f"[{datetime.now()}] Successfully connected to IMAP server")
-            self.stdout.write(self.style.SUCCESS('Connected to IMAP server'))
+            self.stdout.write(self.style.SUCCESS('✓ Подключено к почтовому серверу'))
             
             mail.select("INBOX")
             
@@ -48,10 +60,11 @@ class Command(BaseCommand):
             email_ids = messages[0].split()
             
             logger.info(f"[{datetime.now()}] Found {len(email_ids)} unread email(s)")
+            self.stdout.write(f'Найдено непрочитанных писем: {len(email_ids)}')
             
             if not email_ids:
                 logger.info(f"[{datetime.now()}] No new emails to forward")
-                self.stdout.write(self.style.SUCCESS('No new emails'))
+                self.stdout.write(self.style.SUCCESS('Нет новых писем для пересылки'))
                 mail.close()
                 mail.logout()
                 return
@@ -75,7 +88,7 @@ class Command(BaseCommand):
                     sender = email_message.get("From")
                     
                     logger.info(f"[{datetime.now()}] Processing email: Subject='{subject}', From='{sender}'")
-                    self.stdout.write(f'Processing: {subject} from {sender}...')
+                    self.stdout.write(f'Обработка: {subject} от {sender}...')
                     
                     # Forward email
                     try:
@@ -90,31 +103,34 @@ class Command(BaseCommand):
                         forwarded_count += 1
                         success_msg = f'Successfully forwarded email: {subject} to {settings.FORWARD_TO_EMAIL}'
                         logger.info(f"[{datetime.now()}] {success_msg}")
-                        self.stdout.write(self.style.SUCCESS(f'✓ Forwarded: {subject}'))
+                        self.stdout.write(self.style.SUCCESS(f'✓ Переслано: {subject} → {settings.FORWARD_TO_EMAIL}'))
                         
                     except Exception as send_error:
                         failed_count += 1
                         error_msg = f'Failed to forward email "{subject}": {str(send_error)}'
-                        logger.error(f"[{datetime.now()}] {error_msg}")
-                        self.stdout.write(self.style.ERROR(f'✗ Failed: {subject} - {str(send_error)}'))
+                        logger.error(f"[{datetime.now()}] {error_msg}", exc_info=True)
+                        self.stdout.write(self.style.ERROR(f'✗ Ошибка отправки "{subject}": {str(send_error)}'))
                         
                 except Exception as e:
                     failed_count += 1
                     error_msg = f'Error processing email {email_id}: {str(e)}'
-                    logger.error(f"[{datetime.now()}] {error_msg}")
-                    self.stdout.write(self.style.ERROR(error_msg))
+                    logger.error(f"[{datetime.now()}] {error_msg}", exc_info=True)
+                    self.stdout.write(self.style.ERROR(f'✗ Ошибка обработки письма: {str(e)}'))
             
             mail.close()
             mail.logout()
             
-            summary_msg = f'Completed: {forwarded_count} forwarded, {failed_count} failed'
+            summary_msg = f'Завершено: {forwarded_count} переслано, {failed_count} ошибок'
             logger.info(f"[{datetime.now()}] {summary_msg}")
             self.stdout.write(self.style.SUCCESS(f'\n{summary_msg}'))
             
         except Exception as e:
-            error_msg = f'Critical error: {str(e)}'
+            error_msg = f'Критическая ошибка: {str(e)}'
             logger.error(f"[{datetime.now()}] {error_msg}", exc_info=True)
-            self.stdout.write(self.style.ERROR(error_msg))
+            self.stdout.write(self.style.ERROR(f'\n❌ {error_msg}'))
+            if 'AUTHENTICATIONFAILED' in str(e) or 'Invalid credentials' in str(e):
+                self.stdout.write(self.style.WARNING('\n💡 Подсказка: Проверьте App Password в settings.py'))
+                self.stdout.write(self.style.WARNING('📖 См. инструкцию: EMAIL_SETUP_INSTRUCTIONS.md'))
     
     def get_email_body(self, msg):
         """Extract email body"""
