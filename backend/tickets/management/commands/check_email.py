@@ -11,9 +11,25 @@ from datetime import datetime
 logger = logging.getLogger('email_forwarding')
 
 class Command(BaseCommand):
-    help = 'Check for new emails and forward them'
+    help = 'Check for new emails and forward them (DISABLED - use ticket creation instead)'
+    
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--enable',
+            action='store_true',
+            help='Enable email forwarding (disabled by default)',
+        )
 
     def handle(self, *args, **options):
+        # По умолчанию команда отключена
+        if not options.get('enable', False):
+            self.stdout.write(self.style.WARNING(
+                '\n⚠️  Автоматическая пересылка писем ОТКЛЮЧЕНА!\n'
+                'Письма отправляются только при создании тикетов через веб-интерфейс.\n'
+                'Если нужно включить пересылку, используйте: python3 manage.py check_email --enable\n'
+            ))
+            return
+        
         # IMAP settings for Gmail
         imap_server = "imap.gmail.com"
         imap_port = 993
@@ -68,6 +84,19 @@ class Command(BaseCommand):
                 mail.close()
                 mail.logout()
                 return
+            
+            # Предупреждение о большом количестве писем
+            if len(email_ids) > 10:
+                self.stdout.write(self.style.WARNING(
+                    f'\n⚠️  ВНИМАНИЕ: Найдено {len(email_ids)} непрочитанных писем!\n'
+                    'Это может занять много времени. Рекомендуется использовать создание тикетов через веб-интерфейс.\n'
+                ))
+                response = input('Продолжить пересылку? (yes/no): ')
+                if response.lower() != 'yes':
+                    self.stdout.write(self.style.SUCCESS('Пересылка отменена'))
+                    mail.close()
+                    mail.logout()
+                    return
             
             forwarded_count = 0
             failed_count = 0
