@@ -31,7 +31,6 @@ class TicketSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
     assigned_to_username = serializers.ReadOnlyField(source='assigned_to.username')
     corpus_name = serializers.ReadOnlyField(source='corpus.name')
-    corpus_id = serializers.PrimaryKeyRelatedField(queryset=Corpus.objects.all(), source='corpus', write_only=True)
     duration_minutes = serializers.SerializerMethodField()
 
     class Meta:
@@ -41,3 +40,19 @@ class TicketSerializer(serializers.ModelSerializer):
     
     def get_duration_minutes(self, obj):
         return obj.get_duration()
+    
+    def to_internal_value(self, data):
+        # Обрабатываем corpus_id из FormData
+        if 'corpus_id' in data:
+            # Преобразуем строку в число, если нужно
+            corpus_id = data.get('corpus_id')
+            if isinstance(corpus_id, str):
+                try:
+                    data = data.copy()  # Создаем копию, чтобы не изменять оригинал
+                    data['corpus'] = int(corpus_id)
+                except (ValueError, TypeError):
+                    pass
+            elif corpus_id is not None:
+                data = data.copy()
+                data['corpus'] = corpus_id
+        return super().to_internal_value(data)

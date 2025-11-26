@@ -1,6 +1,8 @@
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 from .models import Ticket, User, Corpus
 from .serializers import TicketSerializer, UserSerializer, CorpusSerializer
 from django.db.models import Count, Q, Avg
@@ -17,6 +19,26 @@ class IsHelpdesk(permissions.BasePermission):
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'admin'
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def custom_obtain_auth_token(request):
+    """
+    Custom token authentication view that works with custom User model
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response({'error': 'Username and password required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user = authenticate(username=username, password=password)
+    
+    if not user:
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    token, created = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key})
 
 class CorpusViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Corpus.objects.all()
