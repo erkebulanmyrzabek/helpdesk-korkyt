@@ -157,3 +157,50 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 FORWARD_FROM_EMAIL = 'erkemyrzaa@gmail.com'
 FORWARD_TO_EMAIL = 'myrzabekerkebulanakt@gmail.com'
 
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'email_forwarding.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'email_forwarding': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.core.mail': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Create logs directory if it doesn't exist
+import os
+logs_dir = BASE_DIR / 'logs'
+if not logs_dir.exists():
+    os.makedirs(logs_dir)
+

@@ -20,6 +20,7 @@ share/
 .env
 .DS_Store
 media/ # If user-uploaded media is not to be version controlled
+backend/logs/*.log
 
 # Node / Vue
 node_modules/
