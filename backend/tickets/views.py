@@ -3,10 +3,15 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import Ticket, User, Corpus
 from .serializers import TicketSerializer, UserSerializer, CorpusSerializer
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
+import logging
+
+logger = logging.getLogger('email_forwarding')
 
 class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -66,7 +71,38 @@ class TicketViewSet(viewsets.ModelViewSet):
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        ticket = serializer.save(author=self.request.user)
+        
+        # Отправляем письмо при создании тикета
+        try:
+            subject = f'Новая заявка #{ticket.id}: {ticket.title}'
+            message = f"""
+Новая заявка создана в системе Helpdesk:
+
+ID: #{ticket.id}
+Заголовок: {ticket.title}
+Описание: {ticket.description}
+Корпус: {ticket.corpus.name}
+Кабинет: {ticket.cabinet}
+Автор: {ticket.author.username} ({ticket.author.get_full_name() or ticket.author.username})
+Дата создания: {ticket.created_at.strftime('%d.%m.%Y %H:%M')}
+
+Статус: {ticket.get_status_display()}
+"""
+            
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.FORWARD_TO_EMAIL],
+                fail_silently=False,
+            )
+            
+            logger.info(f"[{timezone.now()}] Email sent for ticket #{ticket.id} to {settings.FORWARD_TO_EMAIL}")
+            
+        except Exception as e:
+            logger.error(f"[{timezone.now()}] Failed to send email for ticket #{ticket.id}: {str(e)}", exc_info=True)
+            # Не прерываем создание тикета, если письмо не отправилось
 
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def take(self, request, pk=None):

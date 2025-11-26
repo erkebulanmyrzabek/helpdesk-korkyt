@@ -145,12 +145,13 @@ REST_FRAMEWORK = {
 }
 
 # Email settings (SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Используем кастомный backend для обхода проблем с SSL сертификатами на macOS
+EMAIL_BACKEND = 'tickets.email_backend.CustomEmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'erkemyrzaa@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'socialerke')  # App password from Gmail
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'lsfy bivz eehm sdzi')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Email forwarding settings
