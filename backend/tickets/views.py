@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Ticket, User
-from .serializers import TicketSerializer, UserSerializer
+from .models import Ticket, User, Corpus
+from .serializers import TicketSerializer, UserSerializer, CorpusSerializer
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
 
@@ -18,6 +18,11 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'admin'
 
+class CorpusViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Corpus.objects.all()
+    serializer_class = CorpusSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all().order_by('-created_at')
     serializer_class = TicketSerializer
@@ -28,7 +33,12 @@ class TicketViewSet(viewsets.ModelViewSet):
         if user.role == 'teacher':
             return Ticket.objects.filter(author=user).order_by('-created_at')
         elif user.role == 'helpdesk':
-            return Ticket.objects.all().order_by('-created_at')
+            # Хелпдеск видит только заявки своего корпуса
+            if user.corpus:
+                return Ticket.objects.filter(corpus=user.corpus).order_by('-created_at')
+            else:
+                # Если у хелпдеска не указан корпус, не видит ничего
+                return Ticket.objects.none()
         elif user.role == 'admin':
             return Ticket.objects.all().order_by('-created_at')
         return Ticket.objects.none()
@@ -39,6 +49,11 @@ class TicketViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def take(self, request, pk=None):
         ticket = self.get_object()
+        
+        # Проверка, что заявка из корпуса хелпдеска
+        if request.user.corpus and ticket.corpus != request.user.corpus:
+            return Response({'error': 'Эта заявка не из вашего корпуса'}, status=status.HTTP_403_FORBIDDEN)
+        
         if ticket.status != 'open':
             return Response({'error': 'Заявка уже в работе или закрыта'}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -74,7 +89,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         helpdesk_stats = User.objects.filter(role='helpdesk').annotate(
             total_tickets=Count('assigned_tickets', filter=Q(assigned_tickets__status='done')),
             avg_duration=Avg('assigned_tickets__completed_at') - Avg('assigned_tickets__started_at')
-        ).values('id', 'username', 'first_name', 'last_name', 'total_tickets')
+        ).values('id', 'username', 'first_name', 'last_name', 'total_tickets', 'corpus')
         
         # Stats by Teacher
         teacher_stats = User.objects.filter(role='teacher').annotate(

@@ -3,10 +3,11 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import axios from '../axios'
 
 const tickets = ref([])
+const corpuses = ref([])
 const newTicket = ref({
     title: '',
     description: '',
-    corpus: '',
+    corpus_id: null,
     cabinet: '',
     image: null,
     video: null
@@ -19,6 +20,11 @@ const isDragging = ref(false)
 const fetchTickets = async () => {
     const response = await axios.get('tickets/')
     tickets.value = response.data
+}
+
+const fetchCorpuses = async () => {
+    const response = await axios.get('corpuses/')
+    corpuses.value = response.data
 }
 
 const setFile = (file) => {
@@ -80,7 +86,7 @@ const createTicket = async () => {
     const formData = new FormData()
     formData.append('title', newTicket.value.title)
     formData.append('description', newTicket.value.description)
-    formData.append('corpus', newTicket.value.corpus)
+    formData.append('corpus_id', newTicket.value.corpus_id)
     formData.append('cabinet', newTicket.value.cabinet)
     if (newTicket.value.image) formData.append('image', newTicket.value.image)
     if (newTicket.value.video) formData.append('video', newTicket.value.video)
@@ -89,7 +95,7 @@ const createTicket = async () => {
         await axios.post('tickets/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
-        newTicket.value = { title: '', description: '', corpus: '', cabinet: '', image: null, video: null }
+        newTicket.value = { title: '', description: '', corpus_id: null, cabinet: '', image: null, video: null }
         imagePreview.value = null
         fileInputImage.value.value = ''
         fileInputVideo.value.value = ''
@@ -118,7 +124,10 @@ const getStatusText = (status) => {
     }
 }
 
-onMounted(fetchTickets)
+onMounted(() => {
+    fetchTickets()
+    fetchCorpuses()
+})
 
 // Clean up object URL to avoid memory leaks
 onUnmounted(() => {
@@ -142,10 +151,9 @@ onUnmounted(() => {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted">Корпус</label>
-                                <select v-model="newTicket.corpus" class="form-select" required>
-                                    <option value="" disabled>Выберите...</option>
-                                    <option value="Главный корпус">Главный корпус</option>
-                                    <option v-for="i in 9" :key="i" :value="`Корпус ${i}`">Корпус {{ i }}</option>
+                                <select v-model="newTicket.corpus_id" class="form-select" required>
+                                    <option :value="null" disabled>Выберите...</option>
+                                    <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.id">{{ corpus.name }}</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -212,7 +220,7 @@ onUnmounted(() => {
                     </div>
                     <p class="mb-2 text-secondary">{{ ticket.description }}</p>
                     <div class="d-flex align-items-center text-muted small mb-3">
-                        <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.corpus }}</span>
+                        <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.corpus_name || ticket.corpus }}</span>
                         <span class="me-3"><i class="bi bi-door-open me-1"></i>{{ ticket.cabinet }}</span>
                         <span><i class="bi bi-calendar me-1"></i>{{ new Date(ticket.created_at).toLocaleDateString() }}</span>
                     </div>

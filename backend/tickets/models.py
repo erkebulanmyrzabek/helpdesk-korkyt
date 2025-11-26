@@ -2,6 +2,20 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+class Corpus(models.Model):
+    name = models.CharField("Название корпуса", max_length=100, unique=True)
+    number = models.IntegerField("Номер корпуса", null=True, blank=True, unique=True)
+    
+    class Meta:
+        verbose_name = "Корпус"
+        verbose_name_plural = "Корпуса"
+        ordering = ['number', 'name']
+    
+    def __str__(self):
+        if self.number:
+            return f"Корпус {self.number} ({self.name})"
+        return self.name
+
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('teacher', 'Учитель'),
@@ -9,6 +23,9 @@ class User(AbstractUser):
         ('admin', 'Админ'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='teacher')
+    corpus = models.ForeignKey(Corpus, on_delete=models.SET_NULL, null=True, blank=True, 
+                               related_name='helpdesk_users', verbose_name="Корпус",
+                               help_text="Корпус для хелпдеска (оставьте пустым для учителей и админов)")
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
@@ -22,7 +39,7 @@ class Ticket(models.Model):
 
     title = models.CharField("Заголовок", max_length=200)
     description = models.TextField("Описание проблемы")
-    corpus = models.CharField("Корпус", max_length=100)
+    corpus = models.ForeignKey(Corpus, on_delete=models.PROTECT, related_name='tickets', verbose_name="Корпус")
     cabinet = models.CharField("Кабинет", max_length=50)
     
     # Attachments by Teacher
