@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -37,8 +38,19 @@ class Ticket(models.Model):
     report_image = models.ImageField("Фотоотчет", upload_to='tickets/reports/', null=True, blank=True)
     report_comment = models.TextField("Комментарий к выполнению", null=True, blank=True)
     
+    # Timing fields
+    started_at = models.DateTimeField("Время начала работы", null=True, blank=True)
+    completed_at = models.DateTimeField("Время завершения", null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"#{self.id} - {self.title} ({self.get_status_display()})"
+    
+    def get_duration(self):
+        """Возвращает длительность выполнения в минутах"""
+        if self.started_at and self.completed_at:
+            delta = self.completed_at - self.started_at
+            return int(delta.total_seconds() / 60)
+        return None

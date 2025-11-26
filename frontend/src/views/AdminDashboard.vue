@@ -4,7 +4,11 @@ import axios from '../axios'
 
 const stats = ref({
     total: 0,
-    by_status: []
+    by_status: [],
+    helpdesk_stats: [],
+    teacher_stats: [],
+    category_stats: {},
+    avg_completion_time_minutes: null
 })
 const tickets = ref([])
 const users = ref([])
@@ -94,6 +98,14 @@ const getRoleLabel = (role) => {
     }
 }
 
+const formatTime = (minutes) => {
+    if (!minutes) return '-'
+    if (minutes < 60) return `${Math.round(minutes)} мин`
+    const hours = Math.floor(minutes / 60)
+    const mins = Math.round(minutes % 60)
+    return `${hours}ч ${mins}мин`
+}
+
 onMounted(() => {
     fetchStats()
     fetchTickets()
@@ -103,11 +115,11 @@ onMounted(() => {
 
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <h2 class="text-primary mb-0"><i class="bi bi-speedometer2 me-2"></i>Панель администратора</h2>
             <div class="btn-group">
                 <button class="btn" :class="activeTab === 'stats' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'stats'">
-                    <i class="bi bi-graph-up me-1"></i>Статистика и Заявки
+                    <i class="bi bi-graph-up me-1"></i>Статистика
                 </button>
                 <button class="btn" :class="activeTab === 'users' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'users'">
                     <i class="bi bi-people me-1"></i>Пользователи
@@ -117,19 +129,48 @@ onMounted(() => {
         
         <!-- STATS & TICKETS TAB -->
         <div v-if="activeTab === 'stats'">
+            <!-- Main Stats Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card bg-gradient-primary text-white h-100 shadow-sm" style="background: linear-gradient(45deg, #002855, #00509d);">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-5">
-                            <h1 class="display-1 fw-bold mb-0">{{ stats.total }}</h1>
-                            <p class="lead opacity-75">Всего заявок</p>
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
+                            <h1 class="display-4 fw-bold mb-0">{{ stats.total }}</h1>
+                            <p class="mb-0 opacity-75">Всего заявок</p>
                         </div>
                     </div>
                 </div>
-                 <div class="col-md-8">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
+                            <h1 class="display-4 fw-bold mb-0">{{ stats.category_stats?.computers || 0 }}</h1>
+                            <p class="mb-0 opacity-75">Компьютеров</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
+                            <h1 class="display-4 fw-bold mb-0">{{ stats.category_stats?.internet || 0 }}</h1>
+                            <p class="mb-0 opacity-75">Интернет</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
+                            <h1 class="display-4 fw-bold mb-0">{{ formatTime(stats.avg_completion_time_minutes) }}</h1>
+                            <p class="mb-0 opacity-75">Среднее время</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Distribution -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
                     <div class="card shadow-sm h-100">
                         <div class="card-header bg-white border-bottom">
-                             <h5 class="mb-0 text-muted">Распределение по статусам</h5>
+                             <h5 class="mb-0 text-muted"><i class="bi bi-pie-chart me-2"></i>По статусам</h5>
                         </div>
                         <div class="card-body">
                              <div v-if="stats.by_status.length === 0" class="text-center py-4 text-muted">
@@ -147,8 +188,83 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
+
+                <!-- Helpdesk Stats -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0 text-muted"><i class="bi bi-tools me-2"></i>Статистика хелпдесков</h5>
+                        </div>
+                        <div class="card-body">
+                            <div v-if="stats.helpdesk_stats?.length === 0" class="text-center py-4 text-muted">
+                                Нет данных
+                            </div>
+                            <div v-else class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Специалист</th>
+                                            <th class="text-end">Выполнено</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="hd in stats.helpdesk_stats" :key="hd.id">
+                                            <td>{{ hd.first_name || hd.username }}</td>
+                                            <td class="text-end">
+                                                <span class="badge bg-success">{{ hd.total_tickets || 0 }}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Teacher Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0 text-muted"><i class="bi bi-person-check me-2"></i>Статистика учителей</h5>
+                        </div>
+                        <div class="card-body">
+                            <div v-if="stats.teacher_stats?.length === 0" class="text-center py-4 text-muted">
+                                Нет данных
+                            </div>
+                            <div v-else class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Учитель</th>
+                                            <th class="text-center">Всего заявок</th>
+                                            <th class="text-center">Выполнено</th>
+                                            <th class="text-center">В работе</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="teacher in stats.teacher_stats" :key="teacher.id">
+                                            <td>{{ teacher.first_name || teacher.username }}</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">{{ teacher.total_created || 0 }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">{{ teacher.completed || 0 }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning text-dark">{{ (teacher.total_created || 0) - (teacher.completed || 0) }}</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Tickets Table -->
             <div class="card shadow-sm">
                 <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Все заявки</h5>
@@ -163,6 +279,7 @@ onMounted(() => {
                                 <th>Автор</th>
                                 <th>Исполнитель</th>
                                 <th>Место</th>
+                                <th>Время выполнения</th>
                                 <th>Дата</th>
                             </tr>
                         </thead>
@@ -181,6 +298,12 @@ onMounted(() => {
                                 <td>{{ ticket.author_username }}</td>
                                 <td>{{ ticket.assigned_to_username || '-' }}</td>
                                 <td>{{ ticket.corpus }}, {{ ticket.cabinet }}</td>
+                                <td>
+                                    <small v-if="ticket.duration_minutes" class="text-muted">
+                                        {{ formatTime(ticket.duration_minutes) }}
+                                    </small>
+                                    <small v-else class="text-muted">-</small>
+                                </td>
                                 <td>{{ new Date(ticket.created_at).toLocaleDateString() }}</td>
                             </tr>
                         </tbody>

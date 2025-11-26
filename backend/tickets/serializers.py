@@ -15,9 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
     assigned_to_username = serializers.ReadOnlyField(source='assigned_to.username')
+    duration_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
         fields = '__all__'
-        read_only_fields = ('author', 'created_at', 'updated_at')
-
+        read_only_fields = ('author', 'created_at', 'updated_at', 'started_at', 'completed_at')
+    
+    def get_duration_minutes(self, obj):
+        return obj.get_duration()
