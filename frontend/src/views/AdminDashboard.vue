@@ -15,12 +15,26 @@ const users = ref([])
 const corpuses = ref([])
 const newUser = ref({
     username: '',
+    email: '',
     password: '',
     first_name: '',
     last_name: '',
     role: 'teacher',
     corpus_id: null
 })
+const extendDeadlineData = ref({
+    ticketId: null,
+    days: 3
+})
+const visiblePasswords = ref(new Set())
+
+const togglePassword = (userId) => {
+    if (visiblePasswords.value.has(userId)) {
+        visiblePasswords.value.delete(userId)
+    } else {
+        visiblePasswords.value.add(userId)
+    }
+}
 
 const activeTab = ref('stats') // 'stats' or 'users'
 
@@ -67,7 +81,7 @@ const createUser = async () => {
             delete userData.corpus_id
         }
         await axios.post('users/', userData)
-        newUser.value = { username: '', password: '', first_name: '', last_name: '', role: 'teacher', corpus_id: null }
+        newUser.value = { username: '', email: '', password: '', first_name: '', last_name: '', role: 'teacher', corpus_id: null }
         fetchUsers()
         alert('Пользователь создан')
     } catch (error) {
@@ -86,21 +100,50 @@ const deleteUser = async (id) => {
     }
 }
 
-const getStatusLabel = (status) => {
-     switch(status) {
-        case 'open': return 'Открыто';
-        case 'in_progress': return 'В работе';
-        case 'done': return 'Выполнено';
-        default: return status;
+const markUnfixable = async (id) => {
+    if (!confirm('Пометить как неисправимую?')) return
+    try {
+        await axios.post(`tickets/${id}/mark_unfixable/`)
+        fetchTickets()
+        fetchStats()
+    } catch (error) {
+        alert('Ошибка')
     }
 }
 
+const extendDeadline = async () => {
+    try {
+        await axios.post(`tickets/${extendDeadlineData.value.ticketId}/extend_deadline/`, {
+            days: extendDeadlineData.value.days
+        })
+        extendDeadlineData.value.ticketId = null
+        fetchTickets()
+    } catch (error) {
+        alert('Ошибка')
+    }
+}
+
+const getStatusLabel = (status) => {
+    const map = {
+        'NEW': 'Новая',
+        'TRANSIT': 'В пути',
+        'IN_PROGRESS': 'В работе',
+        'WAITING_APPROVE': 'Ожидает подтверждения',
+        'CLOSED': 'Закрыта',
+        'UNFIXABLE': 'Неисправима'
+    }
+    return map[status] || status
+}
+
 const getStatusColor = (status) => {
-     switch(status) {
-        case 'open': return 'bg-success';
-        case 'in_progress': return 'bg-warning text-dark';
-        case 'done': return 'bg-secondary';
-        default: return 'bg-primary';
+    switch(status) {
+        case 'NEW': return 'bg-success';
+        case 'TRANSIT': return 'bg-info text-dark';
+        case 'IN_PROGRESS': return 'bg-warning text-dark';
+        case 'WAITING_APPROVE': return 'bg-primary';
+        case 'CLOSED': return 'bg-secondary';
+        case 'UNFIXABLE': return 'bg-danger';
+        default: return 'bg-light text-dark';
     }
 }
 
@@ -130,7 +173,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <h2 class="text-primary mb-0"><i class="bi bi-speedometer2 me-2"></i>Панель администратора</h2>
             <div class="btn-group">
@@ -155,22 +198,7 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
-                            <h1 class="display-4 fw-bold mb-0">{{ stats.category_stats?.computers || 0 }}</h1>
-                            <p class="mb-0 opacity-75">Компьютеров</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
-                            <h1 class="display-4 fw-bold mb-0">{{ stats.category_stats?.internet || 0 }}</h1>
-                            <p class="mb-0 opacity-75">Интернет</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- You can add more stats cards here if needed -->
                 <div class="col-md-3">
                     <div class="card bg-warning text-dark h-100 shadow-sm">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
@@ -221,6 +249,7 @@ onMounted(() => {
                                         <tr>
                                             <th>Специалист</th>
                                             <th class="text-end">Выполнено</th>
+                                            <th class="text-end">Рейтинг</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -229,47 +258,8 @@ onMounted(() => {
                                             <td class="text-end">
                                                 <span class="badge bg-success">{{ hd.total_tickets || 0 }}</span>
                                             </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Teacher Stats -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="mb-0 text-muted"><i class="bi bi-person-check me-2"></i>Статистика учителей</h5>
-                        </div>
-                        <div class="card-body">
-                            <div v-if="stats.teacher_stats?.length === 0" class="text-center py-4 text-muted">
-                                Нет данных
-                            </div>
-                            <div v-else class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Учитель</th>
-                                            <th class="text-center">Всего заявок</th>
-                                            <th class="text-center">Выполнено</th>
-                                            <th class="text-center">В работе</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="teacher in stats.teacher_stats" :key="teacher.id">
-                                            <td>{{ teacher.first_name || teacher.username }}</td>
-                                            <td class="text-center">
-                                                <span class="badge bg-primary">{{ teacher.total_created || 0 }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-success">{{ teacher.completed || 0 }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-warning text-dark">{{ (teacher.total_created || 0) - (teacher.completed || 0) }}</span>
+                                            <td class="text-end">
+                                                <span class="badge bg-warning text-dark">{{ hd.avg_rating ? hd.avg_rating.toFixed(1) : '-' }}</span>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -295,12 +285,12 @@ onMounted(() => {
                                 <th>Автор</th>
                                 <th>Исполнитель</th>
                                 <th>Место</th>
-                                <th>Время выполнения</th>
-                                <th>Дата</th>
+                                <th>Дедлайн</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="ticket in tickets" :key="ticket.id">
+                            <tr v-for="ticket in tickets" :key="ticket.id" :class="{'table-danger': ticket.is_overdue}">
                                 <td>#{{ ticket.id }}</td>
                                 <td>
                                     <div class="fw-bold">{{ ticket.title }}</div>
@@ -310,20 +300,42 @@ onMounted(() => {
                                     <span class="badge rounded-pill" :class="getStatusColor(ticket.status)">
                                         {{ getStatusLabel(ticket.status) }}
                                     </span>
+                                    <div v-if="ticket.is_overdue" class="badge bg-danger mt-1">ПРОСРОЧЕНО</div>
                                 </td>
                                 <td>{{ ticket.author_username }}</td>
                                 <td>{{ ticket.assigned_to_username || '-' }}</td>
-                                <td>{{ ticket.corpus_name || ticket.corpus }}, {{ ticket.cabinet }}</td>
+                                <td>{{ ticket.building }}, {{ ticket.room }}</td>
                                 <td>
-                                    <small v-if="ticket.duration_minutes" class="text-muted">
-                                        {{ formatTime(ticket.duration_minutes) }}
-                                    </small>
-                                    <small v-else class="text-muted">-</small>
+                                    {{ ticket.deadline ? new Date(ticket.deadline).toLocaleString('ru-RU', { timeZone: 'Asia/Almaty', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-' }}
                                 </td>
-                                <td>{{ new Date(ticket.created_at).toLocaleDateString() }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-danger" title="Неисправимо" @click="markUnfixable(ticket.id)">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning" title="Продлить дедлайн" @click="extendDeadlineData.ticketId = ticket.id">
+                                            <i class="bi bi-clock-history"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+            
+            <!-- Extend Deadline Modal (Simple implementation) -->
+            <div v-if="extendDeadlineData.ticketId" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); z-index: 1000;">
+                <div class="card p-4" style="width: 300px;">
+                    <h5>Продлить дедлайн</h5>
+                    <div class="mb-3">
+                        <label>Дней:</label>
+                        <input type="number" v-model="extendDeadlineData.days" class="form-control">
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-secondary" @click="extendDeadlineData.ticketId = null">Отмена</button>
+                        <button class="btn btn-primary" @click="extendDeadline">Продлить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -341,6 +353,10 @@ onMounted(() => {
                                 <div class="mb-3">
                                     <label class="form-label small text-muted">Логин</label>
                                     <input v-model="newUser.username" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Email</label>
+                                    <input v-model="newUser.email" type="email" class="form-control" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small text-muted">Пароль</label>
@@ -389,6 +405,7 @@ onMounted(() => {
                                         <th>Имя</th>
                                         <th>Роль</th>
                                         <th>Корпус</th>
+                                        <th>Пароль</th>
                                         <th>Действия</th>
                                     </tr>
                                 </thead>
@@ -404,6 +421,16 @@ onMounted(() => {
                                         <td>
                                             <span v-if="user.corpus_name" class="badge bg-info text-white">{{ user.corpus_name }}</span>
                                             <span v-else class="text-muted">-</span>
+                                        </td>
+                                        <td>
+                                            <div v-if="user.plain_password" class="d-flex align-items-center">
+                                                <code v-if="visiblePasswords.has(user.id)">{{ user.plain_password }}</code>
+                                                <span v-else>••••••</span>
+                                                <button class="btn btn-sm btn-link text-muted ms-2 p-0" @click="togglePassword(user.id)">
+                                                    <i class="bi" :class="visiblePasswords.has(user.id) ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                                </button>
+                                            </div>
+                                            <span v-else class="text-muted small">Не сохранен</span>
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-danger" @click="deleteUser(user.id)" v-if="user.username !== 'admin'">

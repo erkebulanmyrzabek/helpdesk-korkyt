@@ -7,14 +7,12 @@ const corpuses = ref([])
 const newTicket = ref({
     title: '',
     description: '',
-    corpus_id: null,
-    cabinet: '',
-    image: null,
-    video: null
+    building: '',
+    room: '',
+    media_before: null
 })
-const fileInputImage = ref(null)
-const fileInputVideo = ref(null)
-const imagePreview = ref(null)
+const fileInputMedia = ref(null)
+const mediaPreview = ref(null)
 const isDragging = ref(false)
 
 const fetchTickets = async () => {
@@ -28,21 +26,17 @@ const fetchCorpuses = async () => {
 }
 
 const setFile = (file) => {
-    newTicket.value.image = file
+    newTicket.value.media_before = file
     if (file) {
-        imagePreview.value = URL.createObjectURL(file)
+        mediaPreview.value = URL.createObjectURL(file)
     } else {
-        imagePreview.value = null
+        mediaPreview.value = null
     }
 }
 
-const handleImageUpload = (event) => {
+const handleMediaUpload = (event) => {
     const file = event.target.files[0]
     setFile(file)
-}
-
-const handleVideoUpload = (event) => {
-    newTicket.value.video = event.target.files[0]
 }
 
 const handlePaste = (event) => {
@@ -55,7 +49,7 @@ const handlePaste = (event) => {
             // Sync with file input
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(blob);
-            fileInputImage.value.files = dataTransfer.files;
+            fileInputMedia.value.files = dataTransfer.files;
             
             event.preventDefault();
             break;
@@ -66,62 +60,110 @@ const handlePaste = (event) => {
 const handleDrop = (event) => {
     isDragging.value = false;
     const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file) { // Allow any file type for now, backend validates
         setFile(file);
         
-        // Sync with file input
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        fileInputImage.value.files = dataTransfer.files;
+        fileInputMedia.value.files = dataTransfer.files;
     }
 }
 
-const removeImage = () => {
-    newTicket.value.image = null;
-    imagePreview.value = null;
-    fileInputImage.value.value = '';
+const removeMedia = () => {
+    newTicket.value.media_before = null;
+    mediaPreview.value = null;
+    fileInputMedia.value.value = '';
 }
 
 const createTicket = async () => {
     const formData = new FormData()
     formData.append('title', newTicket.value.title)
     formData.append('description', newTicket.value.description)
-    formData.append('corpus_id', newTicket.value.corpus_id)
-    formData.append('cabinet', newTicket.value.cabinet)
-    if (newTicket.value.image) formData.append('image', newTicket.value.image)
-    if (newTicket.value.video) formData.append('video', newTicket.value.video)
+    formData.append('building', newTicket.value.building)
+    formData.append('room', newTicket.value.room)
+    if (newTicket.value.media_before) formData.append('media_before', newTicket.value.media_before)
 
     try {
         await axios.post('tickets/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
-        newTicket.value = { title: '', description: '', corpus_id: null, cabinet: '', image: null, video: null }
-        imagePreview.value = null
-        fileInputImage.value.value = ''
-        fileInputVideo.value.value = ''
+        newTicket.value = { title: '', description: '', building: '', room: '', media_before: null }
+        mediaPreview.value = null
+        fileInputMedia.value.value = ''
         fetchTickets()
     } catch (error) {
         console.error(error)
-        alert('Ошибка при создании заявки')
+        alert(error.response?.data?.detail || 'Ошибка при создании заявки')
+    }
+}
+
+const showRatingModal = ref(false)
+const ratingData = ref({
+    ticketId: null,
+    rating: 0,
+    feedback: ''
+})
+
+const confirmTicket = (id) => {
+    ratingData.value = { ticketId: id, rating: 0, feedback: '' }
+    showRatingModal.value = true
+}
+
+const closeRatingModal = () => {
+    showRatingModal.value = false
+    ratingData.value = { ticketId: null, rating: 0, feedback: '' }
+}
+
+const submitRating = async () => {
+    try {
+        await axios.post(`tickets/${ratingData.value.ticketId}/approve/`, {
+            rating: ratingData.value.rating,
+            feedback: ratingData.value.feedback
+        })
+        closeRatingModal()
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка')
     }
 }
 
 const getStatusBadgeClass = (status) => {
     switch(status) {
-        case 'open': return 'badge bg-success';
-        case 'in_progress': return 'badge bg-warning text-dark';
-        case 'done': return 'badge bg-secondary';
+        case 'NEW': return 'badge bg-success';
+        case 'TRANSIT': return 'badge bg-info text-dark';
+        case 'IN_PROGRESS': return 'badge bg-warning text-dark';
+        case 'WAITING_APPROVE': return 'badge bg-primary';
+        case 'CLOSED': return 'badge bg-secondary';
+        case 'UNFIXABLE': return 'badge bg-danger';
         default: return 'badge bg-light text-dark';
     }
 }
 
 const getStatusText = (status) => {
-    switch(status) {
-        case 'open': return 'Открыта';
-        case 'in_progress': return 'В работе';
-        case 'done': return 'Выполнена';
-        default: return status;
+    const map = {
+        'NEW': 'Новая',
+        'TRANSIT': 'В пути',
+        'IN_PROGRESS': 'В работе',
+        'WAITING_APPROVE': 'Ожидает подтверждения',
+        'CLOSED': 'Закрыта',
+        'UNFIXABLE': 'Неисправима'
     }
+    return map[status] || status
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleString('ru-RU', {
+        timeZone: 'Asia/Almaty',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    })
+}
+
+const cleanComment = (comment) => {
+    if (!comment) return ''
+    // Remove [Timestamp] Username: pattern
+    return comment.replace(/\[.*?\] .*?: /g, '').trim()
 }
 
 onMounted(() => {
@@ -129,9 +171,8 @@ onMounted(() => {
     fetchCorpuses()
 })
 
-// Clean up object URL to avoid memory leaks
 onUnmounted(() => {
-    if (imagePreview.value) URL.revokeObjectURL(imagePreview.value)
+    if (mediaPreview.value) URL.revokeObjectURL(mediaPreview.value)
 })
 </script>
 
@@ -151,14 +192,14 @@ onUnmounted(() => {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted">Корпус</label>
-                                <select v-model="newTicket.corpus_id" class="form-select" required>
-                                    <option :value="null" disabled>Выберите...</option>
-                                    <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.id">{{ corpus.name }}</option>
+                                <select v-model="newTicket.building" class="form-select" required>
+                                    <option value="" disabled>Выберите...</option>
+                                    <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.name">{{ corpus.name }}</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-muted">Кабинет</label>
-                                <input v-model="newTicket.cabinet" class="form-control" placeholder="№" required>
+                                <input v-model="newTicket.room" class="form-control" placeholder="№" required>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -167,38 +208,31 @@ onUnmounted(() => {
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted"><i class="bi bi-camera me-1"></i>Фото</label>
+                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео)</label>
                             
-                            <!-- Drag and Drop Zone -->
                             <div 
                                 class="upload-zone mb-2"
                                 :class="{ 'is-dragging': isDragging }"
                                 @dragover.prevent="isDragging = true"
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
-                                @click="$refs.fileInputImage.click()"
+                                @click="$refs.fileInputMedia.click()"
                             >
-                                <div v-if="!imagePreview" class="text-center py-4 text-muted">
+                                <div v-if="!mediaPreview" class="text-center py-4 text-muted">
                                     <i class="bi bi-cloud-upload display-6 mb-2 d-block"></i>
-                                    <span class="small">Нажмите или перетащите фото сюда</span>
-                                    <br>
-                                    <span class="small opacity-75">(или вставьте из буфера Ctrl+V)</span>
+                                    <span class="small">Нажмите или перетащите файл сюда</span>
                                 </div>
                                 <div v-else class="position-relative h-100 d-flex justify-content-center align-items-center bg-light rounded">
-                                    <img :src="imagePreview" class="img-fluid rounded" style="max-height: 200px;">
-                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" @click.stop="removeImage">
+                                    <span class="text-success fw-bold">Файл выбран</span>
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" @click.stop="removeMedia">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </div>
                             
-                            <input type="file" @change="handleImageUpload" ref="fileInputImage" class="d-none" accept="image/*">
+                            <input type="file" @change="handleMediaUpload" ref="fileInputMedia" class="d-none">
                         </div>
                         
-                         <div class="mb-4">
-                            <label class="form-label text-muted"><i class="bi bi-camera-reels me-1"></i>Видео</label>
-                            <input type="file" @change="handleVideoUpload" ref="fileInputVideo" class="form-control" accept="video/*">
-                        </div>
                         <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
                             <i class="bi bi-send me-2"></i>Отправить заявку
                         </button>
@@ -220,30 +254,146 @@ onUnmounted(() => {
                     </div>
                     <p class="mb-2 text-secondary">{{ ticket.description }}</p>
                     <div class="d-flex align-items-center text-muted small mb-3">
-                        <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.corpus_name || ticket.corpus }}</span>
-                        <span class="me-3"><i class="bi bi-door-open me-1"></i>{{ ticket.cabinet }}</span>
-                        <span><i class="bi bi-calendar me-1"></i>{{ new Date(ticket.created_at).toLocaleDateString() }}</span>
+                        <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.building }}</span>
+                        <span class="me-3"><i class="bi bi-door-open me-1"></i>{{ ticket.room }}</span>
+                        <span><i class="bi bi-calendar me-1"></i>{{ new Date(ticket.created_at).toLocaleString('ru-RU', { timeZone: 'Asia/Almaty', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
                     </div>
                     
-                    <div v-if="ticket.image" class="mb-3">
-                         <small class="text-muted d-block mb-1"><i class="bi bi-paperclip me-1"></i>Прикрепленное фото:</small>
-                        <img :src="ticket.image" class="img-thumbnail" style="max-height: 150px;">
+                    <div v-if="ticket.media_before" class="mb-3">
+                         <a :href="ticket.media_before" target="_blank" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-paperclip me-1"></i>Смотреть медиа
+                         </a>
                     </div>
                     
                     <div v-if="ticket.assigned_to_username" class="alert alert-light border-0 bg-light p-2 d-inline-block mb-2">
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
                     </div>
 
-                     <div v-if="ticket.status === 'done'" class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Отчет о выполнении</h6>
-                        <p v-if="ticket.report_comment" class="mb-2">{{ ticket.report_comment }}</p>
-                        <img v-if="ticket.report_image" :src="ticket.report_image" class="img-thumbnail rounded shadow-sm" style="max-width: 200px">
+                     <div v-if="ticket.status === 'WAITING_APPROVE'" class="mt-3 card border-warning mb-3">
+                        <div class="card-header bg-warning text-dark fw-bold">
+                            <i class="bi bi-flag-fill me-2"></i>🏁 Работа выполнена
+                        </div>
+                        <div class="card-body bg-warning bg-opacity-10">
+                            <div class="mb-2">
+                                <strong>Исполнитель:</strong> {{ ticket.assigned_to_username }}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Время завершения:</strong> {{ formatDate(ticket.completed_at) }}
+                            </div>
+                            
+                            <div v-if="ticket.report_comment" class="mb-3 p-2 bg-white rounded border">
+                                <small class="text-muted d-block mb-1">Комментарий исполнителя:</small>
+                                {{ cleanComment(ticket.report_comment) }}
+                            </div>
+
+                            <div v-if="ticket.media_after" class="mb-3">
+                                <small class="text-muted d-block mb-1">Фото результата:</small>
+                                <a :href="ticket.media_after" target="_blank" class="d-inline-block border rounded overflow-hidden">
+                                    <img :src="ticket.media_after" alt="Результат" style="height: 100px; object-fit: cover;">
+                                </a>
+                            </div>
+
+                            <button class="btn btn-success w-100 btn-lg shadow-sm" @click="confirmTicket(ticket.id)">
+                                <i class="bi bi-check-circle-fill me-2"></i>Подтвердить выполнение
+                            </button>
+                        </div>
+                    </div>
+
+                     <div v-if="ticket.status === 'CLOSED'" class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
+                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Rating Modal -->
+    <div v-if="showRatingModal" class="modal-overlay">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Оцените работу специалиста</h5>
+                    <button type="button" class="btn-close" @click="closeRatingModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 text-center">
+                        <label class="form-label d-block">Рейтинг</label>
+                        <div class="rating-stars">
+                            <span 
+                                v-for="star in 5" 
+                                :key="star" 
+                                class="star" 
+                                :class="{ 'active': ratingData.rating >= star }"
+                                @click="ratingData.rating = star"
+                            >
+                                ★
+                            </span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Комментарий</label>
+                        <textarea v-model="ratingData.feedback" class="form-control" rows="3" placeholder="Ваш отзыв..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="closeRatingModal">Отмена</button>
+                    <button type="button" class="btn btn-primary" @click="submitRating" :disabled="!ratingData.rating">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
+
+<style scoped>
+.upload-zone {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #f8f9fa;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.upload-zone:hover, .upload-zone.is-dragging {
+    border-color: var(--primary-color, #0d6efd);
+    background-color: #e9ecef;
+}
+
+.upload-zone img {
+    object-fit: contain;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.rating-stars {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+}
+
+.rating-stars .star {
+    margin: 0 5px;
+    transition: color 0.2s;
+}
+
+.rating-stars .star.active {
+    color: #ffc107;
+}
+</style>
 
 <style scoped>
 .upload-zone {
