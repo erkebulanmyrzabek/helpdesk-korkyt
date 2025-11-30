@@ -8,15 +8,15 @@ from tickets.models import User
 
 def create_users():
     if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', 'admin123', role='admin')
+        User.objects.create_superuser('admin', 'admin@example.com', 'admin', role='admin')
         print("Admin created")
     
     if not User.objects.filter(username='teacher').exists():
-        User.objects.create_user('teacher', 'teacher@example.com', 'teacher123', role='teacher')
+        User.objects.create_user('teacher', 'teacher@example.com', 'teacher', role='teacher')
         print("Teacher created")
     
     if not User.objects.filter(username='helpdesk').exists():
-        User.objects.create_user('helpdesk', 'helpdesk@example.com', 'helpdesk123', role='helpdesk')
+        User.objects.create_user('helpdesk', 'helpdesk@example.com', 'helpdesk', role='helpdesk')
         print("Helpdesk created")
 
 if __name__ == '__main__':
