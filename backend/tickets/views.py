@@ -12,6 +12,7 @@ from django.db.models import Count, Q, Avg
 from django.utils import timezone
 import logging
 import datetime
+import pytz
 
 logger = logging.getLogger('email_forwarding')
 
@@ -84,13 +85,13 @@ class TicketViewSet(viewsets.ModelViewSet):
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
-        # Time Restriction: 09:00 - 18:00
-        now = timezone.now().time()
-        start_time = datetime.time(9, 0, 0)
-        end_time = datetime.time(18, 0, 0)
+        # Time Restriction: 09:00 - 18:00 (Almaty Time)
+        now_utc = timezone.now()
+        almaty_tz = pytz.timezone('Asia/Almaty')
+        now_local = now_utc.astimezone(almaty_tz)
         
-        if not (start_time <= now <= end_time):
-             raise ValidationError({"detail": "Applications are accepted only from 09:00 to 18:00."})
+        if not (9 <= now_local.hour < 18):
+             raise ValidationError({"detail": "Заявки принимаются только с 09:00 до 18:00."})
 
         ticket = serializer.save(author=self.request.user)
         
@@ -113,21 +114,8 @@ class TicketViewSet(viewsets.ModelViewSet):
             
             # If ticket has a building, find helpdesk users with that corpus
             if ticket.building:
-                # Assuming ticket.building stores the NAME of the corpus.
-                # And User.corpus is a ForeignKey to Corpus model.
-                # We need to find Users where user.corpus.name == ticket.building
                 helpdesk_users = User.objects.filter(role='helpdesk', corpus__name=ticket.building)
                 recipient_list = [u.email for u in helpdesk_users if u.email]
-            
-            # If no specific recipients found (or no building), maybe fallback to default forward email?
-            # Requirement says: "Send ... ONLY to those specific helpers."
-            # So if list is empty, we send to no one? Or maybe to the main admin email?
-            # Let's include the default forward email as a fallback or always include it?
-            # User request: "Send ... ONLY to those specific helpers."
-            # But let's keep settings.FORWARD_TO_EMAIL as a fallback if no helpers found, or just add it to the list.
-            
-            if not recipient_list:
-                recipient_list = [settings.FORWARD_TO_EMAIL]
             
             if recipient_list:
                 send_mail(
@@ -155,9 +143,6 @@ class TicketViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         deadline = now.replace(hour=18, minute=0, second=0, microsecond=0)
         if now > deadline:
-            # If taken after 18:00 (unlikely due to creation restriction, but possible), set to next day 18:00?
-            # Or just keep today 18:00 which makes it immediately overdue?
-            # Requirement says "Today's EOD".
             pass
         ticket.deadline = deadline
         
@@ -189,10 +174,36 @@ class TicketViewSet(viewsets.ModelViewSet):
         
         ticket.report_comment = f"{ticket.report_comment or ''}\n[{timezone.now()}] {request.user.username}: {comment}"
         
-        # Extend deadline by 3 days
-        ticket.deadline = timezone.now() + datetime.timedelta(days=3)
+        # Extend deadline by 7 days
+        ticket.deadline = timezone.now() + datetime.timedelta(days=7)
         ticket.is_overdue = False # Reset overdue if extended
         ticket.save()
+
+        # Send Email Notification to Author
+        try:
+            if ticket.author.email:
+                subject = f"Обновление по заявке #{ticket.id}"
+                helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+                
+                message = f"""Здравствуйте!
+                
+Хелпер {helper_name} оставил комментарий к вашей заявке #{ticket.id}:
+
+"{comment}"
+
+Дедлайн продлен на 7 дней.
+
+Перейти к заявке: http://localhost:5173/helpdesk"""
+                
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[ticket.author.email],
+                    fail_silently=False,
+                )
+        except Exception as e:
+            logger.error(f"Failed to send comment email: {e}")
         
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
@@ -211,6 +222,35 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.status = 'WAITING_APPROVE'
         ticket.completed_at = timezone.now() # Technically finished work, waiting approve
         ticket.save()
+
+        # Send Email Notification to Author
+        try:
+            if ticket.author.email:
+                subject = f"Заявка выполнена: {ticket.title}"
+                resolution = ticket.report_comment or 'Комментарий отсутствует'
+                helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+                
+                message = f"""Здравствуйте!
+
+Работа по вашей заявке '{ticket.title}' была завершена.
+Исполнитель: {helper_name}
+
+📄 Отчет о выполнении:
+{resolution}
+
+Пожалуйста, войдите в систему, чтобы подтвердить выполнение и оценить работу мастера.
+http://localhost:5173/helpdesk"""
+                
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[ticket.author.email],
+                    fail_silently=False,
+                )
+        except Exception as e:
+            logger.error(f"Failed to send completion email: {e}")
+
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
@@ -253,6 +293,9 @@ class TicketViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsAdmin])
     def mark_unfixable(self, request, pk=None):
         ticket = self.get_object()
+        if ticket.status == 'CLOSED':
+            raise ValidationError("Нельзя пометить закрытую заявку как неисправимую.")
+        
         ticket.status = 'UNFIXABLE'
         ticket.save()
         return Response(TicketSerializer(ticket, context={'request': request}).data)
@@ -281,11 +324,73 @@ class TicketViewSet(viewsets.ModelViewSet):
             avg_rating=Avg('assigned_tickets__feedback__rating')
         ).values('id', 'username', 'first_name', 'last_name', 'total_tickets', 'avg_rating', 'rating')
         
+        # New Metrics
+        active_helpers = User.objects.filter(role='helpdesk', is_checked_in=True).count()
+        total_helpers = User.objects.filter(role='helpdesk').count()
+        overdue_count = Ticket.objects.filter(is_overdue=True).exclude(status='CLOSED').count()
+
         return Response({
             'total': total,
             'by_status': by_status,
             'helpdesk_stats': list(helpdesk_stats),
+            'active_helpers': active_helpers,
+            'total_helpers': total_helpers,
+            'overdue_count': overdue_count
         })
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAdmin])
+    def export_statistics(self, request):
+        import openpyxl
+        import io
+        from django.core.mail import EmailMessage
+        from django.db.models import Avg, Count, Q
+        from django.utils import timezone
+        import datetime
+
+        # 1. Filter Data (Last 6 months)
+        six_months_ago = timezone.now() - datetime.timedelta(days=30*6)
+        
+        # Get stats per helper
+        helpers = User.objects.filter(role='helpdesk').annotate(
+            completed_count=Count('assigned_tickets', filter=Q(assigned_tickets__status='CLOSED', assigned_tickets__created_at__gte=six_months_ago)),
+            avg_rating=Avg('assigned_tickets__feedback__rating', filter=Q(assigned_tickets__created_at__gte=six_months_ago))
+        )
+
+        # 2. Generate Excel
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Helper Stats"
+
+        # Headers
+        headers = ["Имя специалиста", "Выполнено заявок (6 мес)", "Средний рейтинг"]
+        ws.append(headers)
+
+        # Data
+        for helper in helpers:
+            name = f"{helper.first_name} {helper.last_name}".strip() or helper.username
+            count = helper.completed_count
+            rating = round(helper.avg_rating, 2) if helper.avg_rating else 0.0
+            ws.append([name, count, rating])
+
+        # Save to memory
+        excel_file = io.BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+
+        # 3. Send Email
+        try:
+            email = EmailMessage(
+                subject='Отчет по хелперам (Export)',
+                body='Во вложении отчет по эффективности хелперов за последние 6 месяцев.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[request.user.email],
+            )
+            email.attach('helper_stats.xlsx', excel_file.getvalue(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            email.send()
+            return Response({'message': 'Отчет отправлен на почту'})
+        except Exception as e:
+            logger.error(f"Failed to send export email: {e}")
+            return Response({'error': 'Ошибка при отправке письма'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

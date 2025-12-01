@@ -24,11 +24,16 @@ class Command(BaseCommand):
             try:
                 subject = f'ПРОСРОЧЕНО: Заявка #{ticket.id}'
                 message = f"Заявка #{ticket.id} просрочена.\nДедлайн: {ticket.deadline}\nИсполнитель: {ticket.assigned_to}"
+                
+                recipients = ['adfs7845@gmail.com']
+                if ticket.assigned_to and ticket.assigned_to.email:
+                    recipients.append(ticket.assigned_to.email)
+
                 send_mail(
                     subject,
                     message,
                     settings.DEFAULT_FROM_EMAIL,
-                    [settings.FORWARD_TO_EMAIL], # Send to Admin/Helpdesk email
+                    recipients,
                     fail_silently=True
                 )
             except Exception:

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from '../axios'
+import Clock from '../components/Clock.vue'
 
 const stats = ref({
     total: 0,
@@ -8,7 +9,10 @@ const stats = ref({
     helpdesk_stats: [],
     teacher_stats: [],
     category_stats: {},
-    avg_completion_time_minutes: null
+    avg_completion_time_minutes: null,
+    active_helpers: 0,
+    total_helpers: 0,
+    overdue_count: 0
 })
 const tickets = ref([])
 const users = ref([])
@@ -27,6 +31,42 @@ const extendDeadlineData = ref({
     days: 3
 })
 const visiblePasswords = ref(new Set())
+const isCreatingUser = ref(false)
+
+const filters = ref({
+    id: '',
+    date: '',
+    status: '',
+    author: '',
+    helper: ''
+})
+
+const filteredTickets = computed(() => {
+    return tickets.value.filter(ticket => {
+        // Filter by ID
+        if (filters.value.id && !String(ticket.id).includes(filters.value.id)) return false
+        
+        // Filter by Date (created_at)
+        if (filters.value.date) {
+            const ticketDate = new Date(ticket.created_at).toISOString().split('T')[0]
+            if (ticketDate !== filters.value.date) return false
+        }
+
+        // Filter by Status
+        if (filters.value.status && ticket.status !== filters.value.status) return false
+
+        // Filter by Author
+        if (filters.value.author && !ticket.author_username.toLowerCase().includes(filters.value.author.toLowerCase())) return false
+
+        // Filter by Helper
+        if (filters.value.helper) {
+            const helper = ticket.assigned_to_username || ''
+            if (!helper.toLowerCase().includes(filters.value.helper.toLowerCase())) return false
+        }
+
+        return true
+    })
+})
 
 const togglePassword = (userId) => {
     if (visiblePasswords.value.has(userId)) {
@@ -75,6 +115,8 @@ const fetchCorpuses = async () => {
 }
 
 const createUser = async () => {
+    if (isCreatingUser.value) return;
+    isCreatingUser.value = true;
     try {
         const userData = { ...newUser.value }
         if (userData.role !== 'helpdesk') {
@@ -87,6 +129,8 @@ const createUser = async () => {
     } catch (error) {
         console.error(error)
         alert('Ошибка при создании пользователя')
+    } finally {
+        isCreatingUser.value = false;
     }
 }
 
@@ -164,6 +208,21 @@ const formatTime = (minutes) => {
     return `${hours}ч ${mins}мин`
 }
 
+const exportStats = async () => {
+    isExporting.value = true
+    try {
+        await axios.post('tickets/export_statistics/')
+        alert('Файл отправлен на вашу почту')
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка экспорта')
+    } finally {
+        // Keep disabled for 10 seconds
+        setTimeout(() => {
+            isExporting.value = false
+        }, 10000)
+    }
+}
+
 onMounted(() => {
     fetchStats()
     fetchTickets()
@@ -175,13 +234,24 @@ onMounted(() => {
 <template>
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <h2 class="text-primary mb-0"><i class="bi bi-speedometer2 me-2"></i>Панель администратора</h2>
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="text-primary mb-0"><i class="bi bi-speedometer2 me-2"></i>Панель администратора</h2>
+                <Clock />
+            </div>
             <div class="btn-group">
                 <button class="btn" :class="activeTab === 'stats' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'stats'">
                     <i class="bi bi-graph-up me-1"></i>Статистика
                 </button>
                 <button class="btn" :class="activeTab === 'users' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'users'">
                     <i class="bi bi-people me-1"></i>Пользователи
+                </button>
+                <router-link to="/admin/reviews" class="btn btn-outline-primary">
+                    <i class="bi bi-star me-1"></i>Отзывы
+                </router-link>
+                <button class="btn btn-success" @click="exportStats" :disabled="isExporting">
+                    <span v-if="isExporting" class="spinner-border spinner-border-sm me-2"></span>
+                    <i v-else class="bi bi-file-earmark-excel me-2"></i>
+                    Выгрузка (Excel)
                 </button>
             </div>
         </div>
@@ -190,7 +260,7 @@ onMounted(() => {
         <div v-if="activeTab === 'stats'">
             <!-- Main Stats Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="card bg-gradient-primary text-white h-100 shadow-sm" style="background: linear-gradient(45deg, #002855, #00509d);">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
                             <h1 class="display-4 fw-bold mb-0">{{ stats.total }}</h1>
@@ -198,12 +268,21 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                <!-- You can add more stats cards here if needed -->
-                <div class="col-md-3">
-                    <div class="card bg-warning text-dark h-100 shadow-sm">
+                
+                <div class="col-md-4">
+                    <div class="card bg-success text-white h-100 shadow-sm">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
-                            <h1 class="display-4 fw-bold mb-0">{{ formatTime(stats.avg_completion_time_minutes) }}</h1>
-                            <p class="mb-0 opacity-75">Среднее время</p>
+                            <h1 class="display-4 fw-bold mb-0">{{ stats.active_helpers }} / {{ stats.total_helpers }}</h1>
+                            <p class="mb-0 opacity-75">Хелперы на смене</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
+                            <h1 class="display-4 fw-bold mb-0">{{ stats.overdue_count }}</h1>
+                            <p class="mb-0 opacity-75">Просрочено</p>
                         </div>
                     </div>
                 </div>
@@ -275,9 +354,39 @@ onMounted(() => {
                 <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Все заявки</h5>
                 </div>
-                <div class="table-responsive">
+                
+                <!-- Filters -->
+                <div class="card-body border-bottom bg-light">
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <input type="text" v-model="filters.id" class="form-control form-control-sm" placeholder="Поиск по ID...">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" v-model="filters.date" class="form-control form-control-sm">
+                        </div>
+                        <div class="col-md-2">
+                            <select v-model="filters.status" class="form-select form-select-sm">
+                                <option value="">Все статусы</option>
+                                <option value="NEW">Новая</option>
+                                <option value="TRANSIT">В пути</option>
+                                <option value="IN_PROGRESS">В работе</option>
+                                <option value="WAITING_APPROVE">Ожидает</option>
+                                <option value="CLOSED">Закрыта</option>
+                                <option value="UNFIXABLE">Неисправима</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" v-model="filters.author" class="form-control form-control-sm" placeholder="Автор...">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" v-model="filters.helper" class="form-control form-control-sm" placeholder="Исполнитель...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                        <thead class="table-light sticky-top" style="z-index: 1;">
                             <tr>
                                 <th>ID</th>
                                 <th>Заголовок</th>
@@ -290,8 +399,11 @@ onMounted(() => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="ticket in tickets" :key="ticket.id" :class="{'table-danger': ticket.is_overdue}">
-                                <td>#{{ ticket.id }}</td>
+                            <tr v-if="filteredTickets.length === 0">
+                                <td colspan="8" class="text-center py-4 text-muted">Заявки не найдены</td>
+                            </tr>
+                            <tr v-for="ticket in filteredTickets" :key="ticket.id" :class="{'table-danger': ticket.is_overdue}">
+                                <td><strong>#{{ ticket.id }}</strong></td>
                                 <td>
                                     <div class="fw-bold">{{ ticket.title }}</div>
                                     <small class="text-muted text-truncate d-block" style="max-width: 200px;">{{ ticket.description }}</small>
@@ -310,7 +422,7 @@ onMounted(() => {
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-danger" title="Неисправимо" @click="markUnfixable(ticket.id)">
+                                        <button v-if="ticket.status !== 'CLOSED' && ticket.status !== 'UNFIXABLE'" class="btn btn-outline-danger" title="Неисправимо" @click="markUnfixable(ticket.id)">
                                             <i class="bi bi-x-circle"></i>
                                         </button>
                                         <button class="btn btn-outline-warning" title="Продлить дедлайн" @click="extendDeadlineData.ticketId = ticket.id">
@@ -387,7 +499,13 @@ onMounted(() => {
                                         <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.id">{{ corpus.name }}</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100">Создать</button>
+                                <button type="submit" class="btn btn-primary w-100" :disabled="isCreatingUser">
+                                    <span v-if="isCreatingUser">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Создание...
+                                    </span>
+                                    <span v-else>Создать</span>
+                                </button>
                             </form>
                         </div>
                     </div>

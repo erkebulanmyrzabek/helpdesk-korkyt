@@ -34,10 +34,21 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
         return user
 
+class FeedbackSerializer(serializers.ModelSerializer):
+    helper_username = serializers.ReadOnlyField(source='user.username')
+    author_username = serializers.ReadOnlyField(source='ticket.author.username')
+    ticket_title = serializers.ReadOnlyField(source='ticket.title')
+
+    class Meta:
+        model = Feedback
+        fields = '__all__'
+        read_only_fields = ('user', 'ticket', 'created_at')
+
 class TicketSerializer(serializers.ModelSerializer):
     author_username = serializers.ReadOnlyField(source='author.username')
     assigned_to_username = serializers.ReadOnlyField(source='assigned_to.username')
     duration_minutes = serializers.SerializerMethodField()
+    feedback = FeedbackSerializer(read_only=True)
 
     class Meta:
         model = Ticket
@@ -58,9 +69,3 @@ class TicketSerializer(serializers.ModelSerializer):
                  data['room'] = "*****"
         
         return data
-
-class FeedbackSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Feedback
-        fields = '__all__'
-        read_only_fields = ('user', 'ticket', 'created_at')

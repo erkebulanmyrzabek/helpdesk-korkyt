@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import axios from '../axios'
 import { useAuthStore } from '../stores/auth'
+import Clock from '../components/Clock.vue'
 
 const tickets = ref([])
 const authStore = useAuthStore()
@@ -92,8 +93,12 @@ const handleReportImage = (event) => {
 }
 
 const submitReport = async () => {
+    if (!reportData.value.comment) {
+        alert('Отчет о выполнении (комментарий) обязателен.')
+        return
+    }
     const formData = new FormData()
-    if (reportData.value.comment) formData.append('report_comment', reportData.value.comment) // Optional now? Requirement said comment for feedback, but here maybe optional.
+    formData.append('report_comment', reportData.value.comment)
     if (reportData.value.media_after) formData.append('media_after', reportData.value.media_after)
 
     try {
@@ -123,7 +128,10 @@ onUnmounted(() => {
     <div class="container-fluid">
         <!-- Check-in Status -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3>Панель Хелпдеска</h3>
+            <div class="d-flex align-items-center gap-3">
+                <h3>Панель Хелпдеска</h3>
+                <Clock />
+            </div>
             <button 
                 class="btn" 
                 :class="authStore.user.is_checked_in ? 'btn-success' : 'btn-secondary'"
@@ -146,14 +154,14 @@ onUnmounted(() => {
                         <h5 class="mb-0">Новые заявки</h5>
                         <span class="badge bg-primary rounded-pill">{{ openTickets.length }}</span>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-if="openTickets.length === 0" class="text-center py-5 text-muted">
                             Нет новых заявок
                         </div>
                         <div v-else class="list-group list-group-flush">
                             <div v-for="ticket in openTickets" :key="ticket.id" class="list-group-item p-3" :class="{'bg-danger bg-opacity-10': ticket.is_overdue}">
                                 <div class="d-flex w-100 justify-content-between mb-2">
-                                    <h6 class="mb-1 fw-bold">{{ ticket.title }}</h6>
+                                    <h6 class="mb-1 fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
                                     <span v-if="ticket.is_overdue" class="badge bg-danger">ПРОСРОЧЕНО</span>
                                 </div>
                                 <p class="mb-2 text-secondary small">{{ ticket.description }}</p>
@@ -180,9 +188,9 @@ onUnmounted(() => {
                         <h5 class="mb-0">В работе</h5>
                         <span class="badge bg-dark text-white rounded-pill">{{ myTickets.length }}</span>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-for="ticket in myTickets" :key="ticket.id" class="list-group-item p-3">
-                            <h6 class="fw-bold">{{ ticket.title }}</h6>
+                            <h6 class="fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <div class="small text-muted mb-2">
                                 {{ ticket.building }}, {{ ticket.room }} ({{ ticket.status }})
                             </div>
@@ -200,7 +208,7 @@ onUnmounted(() => {
                                 <button v-else class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
                                     Комментарий
                                 </button>
-                                <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
+                                <button v-if="ticket.status !== 'TRANSIT'" class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
                             </div>
@@ -228,14 +236,24 @@ onUnmounted(() => {
                     <div class="card-header bg-success text-white border-bottom">
                         <h5 class="mb-0">История / Ожидание</h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-for="ticket in waitingTickets" :key="ticket.id" class="list-group-item p-3 bg-light">
-                            <h6 class="text-muted">{{ ticket.title }}</h6>
+                            <h6 class="text-muted">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <span class="badge bg-warning text-dark">Ожидает подтверждения</span>
                         </div>
                         <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
-                            <h6 class="text-muted text-decoration-line-through">{{ ticket.title }}</h6>
-                            <span class="badge bg-success">Закрыто</span>
+                            <h6 class="text-muted text-decoration-line-through">#{{ ticket.id }} {{ ticket.title }}</h6>
+                            <span class="badge bg-success mb-2">Закрыто</span>
+                            
+                            <div v-if="ticket.feedback" class="p-2 rounded" style="background-color: #e9ecef;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="fw-bold text-primary">Отзыв пользователя</small>
+                                    <span class="text-warning small">
+                                        <i v-for="n in 5" :key="n" class="bi" :class="n <= ticket.feedback.rating ? 'bi-star-fill' : 'bi-star'"></i>
+                                    </span>
+                                </div>
+                                <p class="mb-0 small text-dark fst-italic">"{{ ticket.feedback.comment || 'Без комментария' }}"</p>
+                            </div>
                         </div>
                     </div>
                 </div>

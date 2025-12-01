@@ -1,0 +1,32 @@
+INFO 2025-12-01 19:08:46,646 check_email [2025-12-01 19:08:46.646819] Starting email check process
+INFO 2025-12-01 19:08:46,647 check_email [2025-12-01 19:08:46.647818] Connecting to IMAP server: imap.gmail.com:993
+INFO 2025-12-01 19:08:47,787 check_email [2025-12-01 19:08:47.786503] Successfully connected to IMAP server
+INFO 2025-12-01 19:08:48,416 check_email [2025-12-01 19:08:48.416598] Found 4778 unread email(s)
+ERROR 2025-12-01 19:09:47,485 check_email [2025-12-01 19:09:47.485180] Критическая ошибка: socket error: EOF occurred in violation of protocol (_ssl.c:2406)
+Traceback (most recent call last):
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\imaplib.py", line 1006, in _command
+    self.send(data + CRLF)
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\imaplib.py", line 332, in send
+    self.sock.sendall(data)
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\ssl.py", line 1211, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\ssl.py", line 1180, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:2406)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\helpdesk\helpdesk-korkyt\backend\tickets\management\commands\check_email.py", line 97, in handle
+    mail.close()
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\imaplib.py", line 475, in close
+    typ, dat = self._simple_command('CLOSE')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\imaplib.py", line 1230, in _simple_command
+    return self._command_complete(name, self._command(name, *args))
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\imaplib.py", line 1008, in _command
+    raise self.abort('socket error: %s' % val)
+imaplib.IMAP4.abort: socket error: EOF occurred in violation of protocol (_ssl.c:2406)

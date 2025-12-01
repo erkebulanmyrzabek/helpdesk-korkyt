@@ -8,7 +8,7 @@ from tickets.models import User
 
 def create_users():
     if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', 'admin', role='admin')
+        User.objects.create_superuser('admin', 'adfs7845@gmail.com', 'admin', role='admin')
         print("Admin created")
     
     if not User.objects.filter(username='teacher').exists():

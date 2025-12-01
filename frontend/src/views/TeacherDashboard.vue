@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import axios from '../axios'
+import Clock from '../components/Clock.vue'
 
 const tickets = ref([])
 const corpuses = ref([])
@@ -14,6 +15,7 @@ const newTicket = ref({
 const fileInputMedia = ref(null)
 const mediaPreview = ref(null)
 const isDragging = ref(false)
+const isSubmitting = ref(false)
 
 const fetchTickets = async () => {
     const response = await axios.get('tickets/')
@@ -76,6 +78,13 @@ const removeMedia = () => {
 }
 
 const createTicket = async () => {
+    if (isSubmitting.value) return;
+    if (!newTicket.value.media_before) {
+        alert('Пожалуйста, прикрепите фото или видео проблемы.')
+        return
+    }
+    isSubmitting.value = true;
+
     const formData = new FormData()
     formData.append('title', newTicket.value.title)
     formData.append('description', newTicket.value.description)
@@ -94,6 +103,8 @@ const createTicket = async () => {
     } catch (error) {
         console.error(error)
         alert(error.response?.data?.detail || 'Ошибка при создании заявки')
+    } finally {
+        isSubmitting.value = false;
     }
 }
 
@@ -166,6 +177,10 @@ const cleanComment = (comment) => {
     return comment.replace(/\[.*?\] .*?: /g, '').trim()
 }
 
+const isSubmitDisabled = computed(() => {
+    return isSubmitting.value || !newTicket.value.media_before
+})
+
 onMounted(() => {
     fetchTickets()
     fetchCorpuses()
@@ -180,8 +195,9 @@ onUnmounted(() => {
     <div class="row" @paste="handlePaste">
         <div class="col-md-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-white text-primary border-bottom">
+                <div class="card-header bg-white text-primary border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Новая заявка</h5>
+                    <Clock />
                 </div>
                 <div class="card-body">
                     <form @submit.prevent="createTicket">
@@ -208,11 +224,11 @@ onUnmounted(() => {
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео)</label>
+                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео) <span class="text-danger">*</span></label>
                             
                             <div 
                                 class="upload-zone mb-2"
-                                :class="{ 'is-dragging': isDragging }"
+                                :class="{ 'is-dragging': isDragging, 'border-danger': !newTicket.media_before && !isDragging }"
                                 @dragover.prevent="isDragging = true"
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
@@ -221,6 +237,7 @@ onUnmounted(() => {
                                 <div v-if="!mediaPreview" class="text-center py-4 text-muted">
                                     <i class="bi bi-cloud-upload display-6 mb-2 d-block"></i>
                                     <span class="small">Нажмите или перетащите файл сюда</span>
+                                    <div class="text-danger small mt-1" v-if="!newTicket.media_before">* Обязательно</div>
                                 </div>
                                 <div v-else class="position-relative h-100 d-flex justify-content-center align-items-center bg-light rounded">
                                     <span class="text-success fw-bold">Файл выбран</span>
@@ -233,8 +250,14 @@ onUnmounted(() => {
                             <input type="file" @change="handleMediaUpload" ref="fileInputMedia" class="d-none">
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2">
-                            <i class="bi bi-send me-2"></i>Отправить заявку
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" :disabled="isSubmitDisabled">
+                            <span v-if="isSubmitting">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Отправка...
+                            </span>
+                            <span v-else>
+                                <i class="bi bi-send me-2"></i>Отправить заявку
+                            </span>
                         </button>
                     </form>
                 </div>

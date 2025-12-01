@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import TeacherDashboard from '../views/TeacherDashboard.vue'
 import HelpdeskDashboard from '../views/HelpdeskDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import AdminReviews from '../views/AdminReviews.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -34,23 +35,29 @@ const router = createRouter({
       name: 'admin',
       component: AdminDashboard,
       meta: { requiresAuth: true, role: 'admin' }
+    },
+    {
+      path: '/admin/reviews',
+      name: 'admin-reviews',
+      component: AdminReviews,
+      meta: { requiresAuth: true, role: 'admin' }
     }
   ]
 })
 
 router.beforeEach((to, from, next) => {
-    const authStore = useAuthStore()
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        next('/login')
-    } else if (to.meta.role && authStore.user?.role !== to.meta.role) {
-         // Redirect to correct dashboard if wrong role
-         if (authStore.isTeacher) next('/teacher')
-         else if (authStore.isHelpdesk) next('/helpdesk')
-         else if (authStore.isAdmin) next('/admin')
-         else next('/login')
-    } else {
-        next()
-    }
+  const authStore = useAuthStore()
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next('/login')
+  } else if (to.meta.role && authStore.user?.role !== to.meta.role) {
+    // Redirect to correct dashboard if wrong role
+    if (authStore.isTeacher) next('/teacher')
+    else if (authStore.isHelpdesk) next('/helpdesk')
+    else if (authStore.isAdmin) next('/admin')
+    else next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router
