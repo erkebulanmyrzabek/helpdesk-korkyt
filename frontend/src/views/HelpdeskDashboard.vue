@@ -27,15 +27,7 @@ const fetchTickets = async () => {
     }
 }
 
-const checkIn = async () => {
-    try {
-        const response = await axios.post('users/check_in/')
-        authStore.user.is_checked_in = response.data.is_checked_in
-        fetchTickets() // Refresh tickets based on new status
-    } catch (e) {
-        console.error(e)
-    }
-}
+
 
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
 const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && ['TRANSIT', 'IN_PROGRESS'].includes(t.status)))
@@ -126,27 +118,14 @@ onUnmounted(() => {
 
 <template>
     <div class="container-fluid">
-        <!-- Check-in Status -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-3">
+             <div class="d-flex align-items-center gap-3">
                 <h3>Панель Хелпдеска</h3>
                 <Clock />
             </div>
-            <button 
-                class="btn" 
-                :class="authStore.user.is_checked_in ? 'btn-success' : 'btn-secondary'"
-                @click="checkIn"
-            >
-                <i class="bi" :class="authStore.user.is_checked_in ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
-                {{ authStore.user.is_checked_in ? 'На смене' : 'Не на смене' }}
-            </button>
         </div>
 
-        <div v-if="!authStore.user.is_checked_in" class="alert alert-warning text-center">
-            Вы не на смене. Нажмите кнопку выше, чтобы видеть заявки.
-        </div>
-
-        <div v-else class="row">
+        <div class="row">
             <!-- New Tickets -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100">

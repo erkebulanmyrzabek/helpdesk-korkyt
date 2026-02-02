@@ -30,7 +30,6 @@ class User(AbstractUser):
     
     # New fields
     plain_password = models.CharField("Пароль (raw)", max_length=255, null=True, blank=True)
-    is_checked_in = models.BooleanField("На смене", default=False)
     rating = models.FloatField("Рейтинг", default=0.0)
 
     def __str__(self):

@@ -46,7 +46,7 @@ def custom_obtain_auth_token(request):
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     
     token, created = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key, 'role': user.role, 'is_checked_in': user.is_checked_in})
+    return Response({'token': token.key, 'role': user.role})
 
 class CorpusViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Corpus.objects.all()
@@ -66,10 +66,6 @@ class TicketViewSet(viewsets.ModelViewSet):
         if user.role == 'teacher':
             return base_qs.filter(author=user)
         elif user.role == 'helpdesk':
-            # Helpdesk sees tickets only if checked in
-            if not user.is_checked_in:
-                return Ticket.objects.none()
-            
             # Helpdesk sees tickets from their building (if assigned)
             if user.corpus:
                 return base_qs.filter(building=user.corpus.name) # Assuming building name matches corpus name
@@ -325,7 +321,6 @@ http://localhost:5173/helpdesk"""
         ).values('id', 'username', 'first_name', 'last_name', 'total_tickets', 'avg_rating', 'rating')
         
         # New Metrics
-        active_helpers = User.objects.filter(role='helpdesk', is_checked_in=True).count()
         total_helpers = User.objects.filter(role='helpdesk').count()
         overdue_count = Ticket.objects.filter(is_overdue=True).exclude(status='CLOSED').count()
 
@@ -333,7 +328,6 @@ http://localhost:5173/helpdesk"""
             'total': total,
             'by_status': by_status,
             'helpdesk_stats': list(helpdesk_stats),
-            'active_helpers': active_helpers,
             'total_helpers': total_helpers,
             'overdue_count': overdue_count
         })
@@ -356,11 +350,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['post'], permission_classes=[IsHelpdesk])
-    def check_in(self, request):
-        request.user.is_checked_in = not request.user.is_checked_in
-        request.user.save()
-        return Response({'is_checked_in': request.user.is_checked_in})
+
 
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()

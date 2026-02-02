@@ -10,7 +10,7 @@ const stats = ref({
     teacher_stats: [],
     category_stats: {},
     avg_completion_time_minutes: null,
-    active_helpers: 0,
+
     total_helpers: 0,
     overdue_count: 0
 })
@@ -242,7 +242,7 @@ onMounted(() => {
         <div v-if="activeTab === 'stats'">
             <!-- Main Stats Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card bg-gradient-primary text-white h-100 shadow-sm" style="background: linear-gradient(45deg, #002855, #00509d);">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
                             <h1 class="display-4 fw-bold mb-0">{{ stats.total }}</h1>
@@ -250,17 +250,8 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-md-4">
-                    <div class="card bg-success text-white h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
-                            <h1 class="display-4 fw-bold mb-0">{{ stats.active_helpers }} / {{ stats.total_helpers }}</h1>
-                            <p class="mb-0 opacity-75">Хелперы на смене</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card bg-danger text-white h-100 shadow-sm">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
                             <h1 class="display-4 fw-bold mb-0">{{ stats.overdue_count }}</h1>
