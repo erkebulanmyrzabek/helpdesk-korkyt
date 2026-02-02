@@ -33,7 +33,6 @@ class User(AbstractUser):
 class Ticket(models.Model):
     STATUS_CHOICES = (
         ('NEW', 'Новая'),
-        ('TRANSIT', 'В пути'),
         ('IN_PROGRESS', 'В работе'),
         ('WAITING_APPROVE', 'Ожидает подтверждения'),
         ('CLOSED', 'Закрыта'),

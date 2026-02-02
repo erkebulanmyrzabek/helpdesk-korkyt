@@ -51,14 +51,4 @@ class TicketSerializer(serializers.ModelSerializer):
     def get_duration_minutes(self, obj):
         return obj.get_duration()
     
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context.get('request')
-        
-        # Masking logic for Helpdesk
-        if request and request.user.role == 'helpdesk':
-            # If ticket is NOT taken by this user, mask the room
-            if instance.assigned_to != request.user:
-                 data['room'] = "*****"
-        
-        return data
+

@@ -141,7 +141,6 @@ const submitRating = async () => {
 const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
-        case 'TRANSIT': return 'badge bg-info text-dark';
         case 'IN_PROGRESS': return 'badge bg-warning text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
@@ -153,7 +152,6 @@ const getStatusBadgeClass = (status) => {
 const getStatusText = (status) => {
     const map = {
         'NEW': 'Новая',
-        'TRANSIT': 'В пути',
         'IN_PROGRESS': 'В работе',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',

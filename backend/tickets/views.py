@@ -91,7 +91,7 @@ class TicketViewSet(viewsets.ModelViewSet):
 Описание: {ticket.description}
 
 Корпус: {ticket.building}
-Кабинет: ***** (Примите заявку, чтобы увидеть)
+Кабинет: {ticket.room}
 
 Перейти к заявке: http://localhost:5173/helpdesk"""
             
@@ -121,9 +121,10 @@ class TicketViewSet(viewsets.ModelViewSet):
         if ticket.status != 'NEW':
             return Response({'error': 'Заявка уже не новая'}, status=status.HTTP_400_BAD_REQUEST)
         
-        ticket.status = 'TRANSIT'
+        ticket.status = 'IN_PROGRESS'
         ticket.assigned_to = request.user
         ticket.taken_at = timezone.now()
+        ticket.started_at = timezone.now()
         
         # Set Deadline: Today 18:00
         now = timezone.now()
@@ -135,23 +136,13 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.save()
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
-    def arrive(self, request, pk=None):
-        ticket = self.get_object()
-        if ticket.status != 'TRANSIT':
-             return Response({'error': 'Заявка не в пути'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        ticket.status = 'IN_PROGRESS'
-        ticket.started_at = timezone.now()
-        ticket.save()
-        return Response(TicketSerializer(ticket, context={'request': request}).data)
+
 
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def add_comment(self, request, pk=None):
         ticket = self.get_object()
         
-        if ticket.status == 'TRANSIT':
-            return Response({'error': 'You cannot add comments while in Transit. Please mark as Arrived/In Progress first.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
         comment = request.data.get('comment')
         

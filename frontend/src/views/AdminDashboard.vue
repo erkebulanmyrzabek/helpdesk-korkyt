@@ -157,7 +157,6 @@ const extendDeadline = async () => {
 const getStatusLabel = (status) => {
     const map = {
         'NEW': 'Новая',
-        'TRANSIT': 'В пути',
         'IN_PROGRESS': 'В работе',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
@@ -169,7 +168,6 @@ const getStatusLabel = (status) => {
 const getStatusColor = (status) => {
     switch(status) {
         case 'NEW': return 'bg-success';
-        case 'TRANSIT': return 'bg-info text-dark';
         case 'IN_PROGRESS': return 'bg-warning text-dark';
         case 'WAITING_APPROVE': return 'bg-primary';
         case 'CLOSED': return 'bg-secondary';
@@ -327,7 +325,6 @@ onMounted(() => {
                             <select v-model="filters.status" class="form-select form-select-sm">
                                 <option value="">Все статусы</option>
                                 <option value="NEW">Новая</option>
-                                <option value="TRANSIT">В пути</option>
                                 <option value="IN_PROGRESS">В работе</option>
                                 <option value="WAITING_APPROVE">Ожидает</option>
                                 <option value="CLOSED">Закрыта</option>

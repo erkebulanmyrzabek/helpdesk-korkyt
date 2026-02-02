@@ -16,7 +16,6 @@ const commentData = ref({
     text: ''
 })
 const currentTime = ref(new Date())
-let timerInterval = null
 
 const fetchTickets = async () => {
     try {
@@ -30,24 +29,9 @@ const fetchTickets = async () => {
 
 
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
-const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && ['TRANSIT', 'IN_PROGRESS'].includes(t.status)))
+const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS'))
 const waitingTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'WAITING_APPROVE'))
 const completedTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED'))
-
-const getTransitTime = (ticket) => {
-    if (!ticket.taken_at) return '00:00'
-    // Deadline for transit is taken_at + 10 mins? Requirement said "Calculate remaining time: (taken_at + 10 minutes) - now"
-    const taken = new Date(ticket.taken_at)
-    const deadline = new Date(taken.getTime() + 10 * 60000)
-    const now = currentTime.value
-    const diff = Math.floor((deadline - now) / 1000)
-    
-    if (diff <= 0) return 'Прибытие'
-    
-    const mins = Math.floor(diff / 60)
-    const secs = diff % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-}
 
 const takeTicket = async (id) => {
     try {
@@ -58,14 +42,7 @@ const takeTicket = async (id) => {
     }
 }
 
-const arrive = async (id) => {
-    try {
-        await axios.post(`tickets/${id}/arrive/`)
-        fetchTickets()
-    } catch (error) {
-        alert(error.response?.data?.error || 'Ошибка')
-    }
-}
+
 
 const addComment = async () => {
     try {
@@ -106,14 +83,9 @@ const submitReport = async () => {
 
 onMounted(() => {
     fetchTickets()
-    timerInterval = setInterval(() => {
-        currentTime.value = new Date()
-    }, 1000)
 })
 
-onUnmounted(() => {
-    if (timerInterval) clearInterval(timerInterval)
-})
+
 </script>
 
 <template>
@@ -174,26 +146,20 @@ onUnmounted(() => {
                                 {{ ticket.building }}, {{ ticket.room }} ({{ ticket.status }})
                             </div>
                             
-                            <!-- Transit Timer -->
-                            <div v-if="ticket.status === 'TRANSIT'" class="alert alert-info py-1 mb-2">
-                                <i class="bi bi-stopwatch"></i> Прибытие через: <strong>{{ getTransitTime(ticket) }}</strong>
-                            </div>
+
 
                             <!-- Actions -->
                             <div class="d-flex gap-2 mt-2">
-                                <button v-if="ticket.status === 'TRANSIT'" class="btn btn-sm btn-primary" @click="arrive(ticket.id)">
-                                    Прибыл на место
-                                </button>
-                                <button v-else class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
+                                <button class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
                                     Комментарий
                                 </button>
-                                <button v-if="ticket.status !== 'TRANSIT'" class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
+                                <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
                             </div>
 
                             <!-- Comment Form -->
-                            <div v-if="commentData.id === ticket.id && ticket.status !== 'TRANSIT'" class="mt-2">
+                            <div v-if="commentData.id === ticket.id" class="mt-2">
                                 <textarea v-model="commentData.text" class="form-control form-control-sm mb-1" placeholder="Комментарий (продлит дедлайн)"></textarea>
                                 <button class="btn btn-sm btn-primary" @click="addComment">Отправить</button>
                             </div>
