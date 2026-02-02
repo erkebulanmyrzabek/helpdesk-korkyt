@@ -338,59 +338,7 @@ http://localhost:5173/helpdesk"""
             'overdue_count': overdue_count
         })
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAdmin])
-    def export_statistics(self, request):
-        import openpyxl
-        import io
-        from django.core.mail import EmailMessage
-        from django.db.models import Avg, Count, Q
-        from django.utils import timezone
-        import datetime
 
-        # 1. Filter Data (Last 6 months)
-        six_months_ago = timezone.now() - datetime.timedelta(days=30*6)
-        
-        # Get stats per helper
-        helpers = User.objects.filter(role='helpdesk').annotate(
-            completed_count=Count('assigned_tickets', filter=Q(assigned_tickets__status='CLOSED', assigned_tickets__created_at__gte=six_months_ago)),
-            avg_rating=Avg('assigned_tickets__feedback__rating', filter=Q(assigned_tickets__created_at__gte=six_months_ago))
-        )
-
-        # 2. Generate Excel
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Helper Stats"
-
-        # Headers
-        headers = ["Имя специалиста", "Выполнено заявок (6 мес)", "Средний рейтинг"]
-        ws.append(headers)
-
-        # Data
-        for helper in helpers:
-            name = f"{helper.first_name} {helper.last_name}".strip() or helper.username
-            count = helper.completed_count
-            rating = round(helper.avg_rating, 2) if helper.avg_rating else 0.0
-            ws.append([name, count, rating])
-
-        # Save to memory
-        excel_file = io.BytesIO()
-        wb.save(excel_file)
-        excel_file.seek(0)
-
-        # 3. Send Email
-        try:
-            email = EmailMessage(
-                subject='Отчет по хелперам (Export)',
-                body='Во вложении отчет по эффективности хелперов за последние 6 месяцев.',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[request.user.email],
-            )
-            email.attach('helper_stats.xlsx', excel_file.getvalue(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            email.send()
-            return Response({'message': 'Отчет отправлен на почту'})
-        except Exception as e:
-            logger.error(f"Failed to send export email: {e}")
-            return Response({'error': 'Ошибка при отправке письма'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

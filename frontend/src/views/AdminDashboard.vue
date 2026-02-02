@@ -208,20 +208,7 @@ const formatTime = (minutes) => {
     return `${hours}ч ${mins}мин`
 }
 
-const exportStats = async () => {
-    isExporting.value = true
-    try {
-        await axios.post('tickets/export_statistics/')
-        alert('Файл отправлен на вашу почту')
-    } catch (error) {
-        alert(error.response?.data?.error || 'Ошибка экспорта')
-    } finally {
-        // Keep disabled for 10 seconds
-        setTimeout(() => {
-            isExporting.value = false
-        }, 10000)
-    }
-}
+
 
 onMounted(() => {
     fetchStats()
@@ -248,11 +235,6 @@ onMounted(() => {
                 <router-link to="/admin/reviews" class="btn btn-outline-primary">
                     <i class="bi bi-star me-1"></i>Отзывы
                 </router-link>
-                <button class="btn btn-success" @click="exportStats" :disabled="isExporting">
-                    <span v-if="isExporting" class="spinner-border spinner-border-sm me-2"></span>
-                    <i v-else class="bi bi-file-earmark-excel me-2"></i>
-                    Выгрузка (Excel)
-                </button>
             </div>
         </div>
         
