@@ -8,7 +8,7 @@ db.sqlite3
 .env
 *.env
 staticfiles/
-
+.venv/
 # Media (User uploads)
 media/
 backend/media/
