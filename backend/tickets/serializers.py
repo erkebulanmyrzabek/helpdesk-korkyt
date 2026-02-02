@@ -9,29 +9,22 @@ class CorpusSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    corpus_name = serializers.ReadOnlyField(source='corpus.name')
-    corpus_id = serializers.PrimaryKeyRelatedField(queryset=Corpus.objects.all(), source='corpus', required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'role', 'first_name', 'last_name', 'corpus', 'corpus_id', 'corpus_name', 'rating', 'plain_password')
+        fields = ('id', 'username', 'email', 'password', 'role', 'first_name', 'last_name', 'rating', 'plain_password')
         extra_kwargs = {
-            'corpus': {'read_only': True},
             'rating': {'read_only': True},
             'plain_password': {'read_only': True}
         }
     
     def create(self, validated_data):
-        corpus = validated_data.pop('corpus', None)
         password = validated_data.get('password')
         
         # Save plain password
         validated_data['plain_password'] = password
         
         user = User.objects.create_user(**validated_data)
-        if corpus:
-            user.corpus = corpus
-            user.save()
         return user
 
 class FeedbackSerializer(serializers.ModelSerializer):

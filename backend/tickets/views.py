@@ -66,16 +66,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         if user.role == 'teacher':
             return base_qs.filter(author=user)
         elif user.role == 'helpdesk':
-            # Helpdesk sees tickets from their building (if assigned)
-            if user.corpus:
-                return base_qs.filter(building=user.corpus.name) # Assuming building name matches corpus name
-            else:
-                # If no specific corpus assigned, maybe see all? Or none? 
-                # Requirement said "Helpers see ONLY the building". 
-                # Let's assume they see all if no corpus assigned, or filter by building matches.
-                # For now, let's return all for unassigned helpdesk, or restrict.
-                # Let's stick to: if corpus assigned, filter by it.
-                return base_qs
+            return base_qs
         elif user.role == 'admin':
             return base_qs
         return Ticket.objects.none()
@@ -108,10 +99,9 @@ class TicketViewSet(viewsets.ModelViewSet):
             # Find helpdesk users assigned to this building
             recipient_list = []
             
-            # If ticket has a building, find helpdesk users with that corpus
-            if ticket.building:
-                helpdesk_users = User.objects.filter(role='helpdesk', corpus__name=ticket.building)
-                recipient_list = [u.email for u in helpdesk_users if u.email]
+            # Targeted Notification Logic: Now sends to all helpdesk users
+            helpdesk_users = User.objects.filter(role='helpdesk')
+            recipient_list = [u.email for u in helpdesk_users if u.email]
             
             if recipient_list:
                 send_mail(

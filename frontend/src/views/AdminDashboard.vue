@@ -16,15 +16,13 @@ const stats = ref({
 })
 const tickets = ref([])
 const users = ref([])
-const corpuses = ref([])
 const newUser = ref({
     username: '',
     email: '',
     password: '',
     first_name: '',
     last_name: '',
-    role: 'teacher',
-    corpus_id: null
+    role: 'teacher'
 })
 const extendDeadlineData = ref({
     ticketId: null,
@@ -105,25 +103,14 @@ const fetchUsers = async () => {
     }
 }
 
-const fetchCorpuses = async () => {
-    try {
-        const response = await axios.get('corpuses/')
-        corpuses.value = response.data
-    } catch (error) {
-        console.error(error)
-    }
-}
+
 
 const createUser = async () => {
     if (isCreatingUser.value) return;
     isCreatingUser.value = true;
     try {
-        const userData = { ...newUser.value }
-        if (userData.role !== 'helpdesk') {
-            delete userData.corpus_id
-        }
-        await axios.post('users/', userData)
-        newUser.value = { username: '', email: '', password: '', first_name: '', last_name: '', role: 'teacher', corpus_id: null }
+        await axios.post('users/', newUser.value)
+        newUser.value = { username: '', email: '', password: '', first_name: '', last_name: '', role: 'teacher' }
         fetchUsers()
         alert('Пользователь создан')
     } catch (error) {
@@ -214,7 +201,6 @@ onMounted(() => {
     fetchStats()
     fetchTickets()
     fetchUsers()
-    fetchCorpuses()
 })
 </script>
 
@@ -465,13 +451,6 @@ onMounted(() => {
                                         <option value="admin">Администратор</option>
                                     </select>
                                 </div>
-                                <div class="mb-3" v-if="newUser.role === 'helpdesk'">
-                                    <label class="form-label small text-muted">Корпус</label>
-                                    <select v-model="newUser.corpus_id" class="form-select">
-                                        <option :value="null">Выберите корпус</option>
-                                        <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.id">{{ corpus.name }}</option>
-                                    </select>
-                                </div>
                                 <button type="submit" class="btn btn-primary w-100" :disabled="isCreatingUser">
                                     <span v-if="isCreatingUser">
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -495,7 +474,6 @@ onMounted(() => {
                                         <th>Логин</th>
                                         <th>Имя</th>
                                         <th>Роль</th>
-                                        <th>Корпус</th>
                                         <th>Пароль</th>
                                         <th>Действия</th>
                                     </tr>
@@ -508,10 +486,6 @@ onMounted(() => {
                                             <span class="badge bg-light text-dark border">
                                                 {{ getRoleLabel(user.role) }}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span v-if="user.corpus_name" class="badge bg-info text-white">{{ user.corpus_name }}</span>
-                                            <span v-else class="text-muted">-</span>
                                         </td>
                                         <td>
                                             <div v-if="user.plain_password" class="d-flex align-items-center">

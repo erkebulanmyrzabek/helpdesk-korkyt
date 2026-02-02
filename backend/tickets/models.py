@@ -24,11 +24,6 @@ class User(AbstractUser):
         ('admin', 'Админ'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='teacher')
-    corpus = models.ForeignKey(Corpus, on_delete=models.SET_NULL, null=True, blank=True, 
-                               related_name='helpdesk_users', verbose_name="Корпус",
-                               help_text="Корпус для хелпдеска (оставьте пустым для учителей и админов)")
-    
-    # New fields
     plain_password = models.CharField("Пароль (raw)", max_length=255, null=True, blank=True)
     rating = models.FloatField("Рейтинг", default=0.0)
 

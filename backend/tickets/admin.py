@@ -9,13 +9,13 @@ class CorpusAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'role', 'corpus', 'rating')
-    list_filter = ('role', 'corpus')
+    list_display = ('username', 'first_name', 'last_name', 'role', 'rating')
+    list_filter = ('role',)
     search_fields = ('username', 'first_name', 'last_name')
     fieldsets = (
         (None, {'fields': ('username', 'password', 'plain_password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('role', 'corpus', 'is_active', 'is_staff', 'is_superuser')}),
+        ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser')}),
         ('Helpdesk Info', {'fields': ('rating',)}),
     )
     readonly_fields = ('plain_password',)
