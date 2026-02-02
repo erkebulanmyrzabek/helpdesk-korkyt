@@ -104,9 +104,9 @@ npm run dev
 
 | Роль | Логин | Пароль |
 | :--- | :--- | :--- |
-| **Учитель** | `teacher` | `teacher123` |
-| **Хелпдеск** | `helpdesk` | `helpdesk123` |
-| **Админ** | `admin` | `admin123` |
+| **Учитель** | `teacher` | `teacher` |
+| **Хелпдеск** | `helpdesk` | `helpdesk` |
+| **Админ** | `admin` | `admin` |
 
 ---
 
