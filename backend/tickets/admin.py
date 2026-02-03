@@ -12,9 +12,9 @@ class SystemSettingAdmin(admin.ModelAdmin):
 
 @admin.register(Corpus)
 class CorpusAdmin(admin.ModelAdmin):
-    list_display = ('name', 'number')
+    list_display = ('id', 'name')
     search_fields = ('name',)
-    ordering = ('number', 'name')
+    ordering = ('id',)
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):

@@ -4,7 +4,7 @@ from .models import User, Ticket, Corpus, Feedback, SystemSetting
 class CorpusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Corpus
-        fields = ('id', 'name', 'number')
+        fields = ('id', 'name')
         read_only_fields = ('id',)
 
 class UserSerializer(serializers.ModelSerializer):

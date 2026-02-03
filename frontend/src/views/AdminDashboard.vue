@@ -36,8 +36,11 @@ const filters = ref({
     date: '',
     status: '',
     author: '',
-    helper: ''
+    helper: '',
+    building: ''
 })
+
+const corpuses = ref([])
 
 const filteredTickets = computed(() => {
     return tickets.value.filter(ticket => {
@@ -61,6 +64,9 @@ const filteredTickets = computed(() => {
             const helper = ticket.assigned_to_username || ''
             if (!helper.toLowerCase().includes(filters.value.helper.toLowerCase())) return false
         }
+
+        // Filter by Building
+        if (filters.value.building && ticket.building !== filters.value.building) return false
 
         return true
     })
@@ -98,6 +104,15 @@ const fetchUsers = async () => {
     try {
         const response = await axios.get('users/')
         users.value = response.data
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+const fetchCorpuses = async () => {
+    try {
+        const response = await axios.get('corpuses/')
+        corpuses.value = response.data
     } catch (error) {
         console.error(error)
     }
@@ -199,6 +214,7 @@ onMounted(() => {
     fetchStats()
     fetchTickets()
     fetchUsers()
+    fetchCorpuses()
 })
 </script>
 
@@ -337,8 +353,14 @@ onMounted(() => {
                         <div class="col-md-3">
                             <input type="text" v-model="filters.author" class="form-control form-control-sm" placeholder="Автор...">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <input type="text" v-model="filters.helper" class="form-control form-control-sm" placeholder="Исполнитель...">
+                        </div>
+                        <div class="col-md-2">
+                            <select v-model="filters.building" class="form-select form-select-sm">
+                                <option value="">Все здания</option>
+                                <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.name">{{ corpus.name }}</option>
+                            </select>
                         </div>
                     </div>
                 </div>

@@ -5,16 +5,13 @@ import os
 
 class Corpus(models.Model):
     name = models.CharField("Название корпуса", max_length=100, unique=True)
-    number = models.IntegerField("Номер корпуса", null=True, blank=True, unique=True)
     
     class Meta:
         verbose_name = "Корпус"
         verbose_name_plural = "Корпуса"
-        ordering = ['number', 'name']
+        ordering = ['id']
     
     def __str__(self):
-        if self.number:
-            return f"Корпус {self.number} ({self.name})"
         return self.name
 
 class User(AbstractUser):

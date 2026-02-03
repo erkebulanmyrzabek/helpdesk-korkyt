@@ -48,10 +48,25 @@ def custom_obtain_auth_token(request):
     token, created = Token.objects.get_or_create(user=user)
     return Response({'token': token.key, 'role': user.role})
 
-class CorpusViewSet(viewsets.ReadOnlyModelViewSet):
+class CorpusViewSet(viewsets.ModelViewSet):
     queryset = Corpus.objects.all()
     serializer_class = CorpusSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAuthenticated(), IsAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Check if any tickets use this building name
+        ticket_count = Ticket.objects.filter(building=instance.name).exists()
+        if ticket_count:
+            return Response(
+                {"error": f"Нельзя удалить здание '{instance.name}', так как за ним закреплены заявки. Сначала удалите или переместите заявки."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().destroy(request, *args, **kwargs)
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all().order_by('-is_overdue', '-created_at')
