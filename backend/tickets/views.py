@@ -215,11 +215,9 @@ class TicketViewSet(viewsets.ModelViewSet):
         if ticket.assigned_to != request.user:
              return Response({'error': 'Вы не исполнитель этой заявки'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Check for media_after
+        # Check for media_after (Optional)
         if 'media_after' in request.FILES:
             ticket.media_after = request.FILES['media_after']
-        elif not ticket.media_after:
-             return Response({'error': 'Фотоотчет обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         ticket.status = 'WAITING_APPROVE'
         ticket.completed_at = timezone.now() # Technically finished work, waiting approve

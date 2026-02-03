@@ -89,10 +89,6 @@ const removeMedia = () => {
 
 const createTicket = async () => {
     if (isSubmitting.value) return;
-    if (!newTicket.value.media_before) {
-        alert('Пожалуйста, прикрепите фото или видео проблемы.')
-        return
-    }
     isSubmitting.value = true;
 
     const formData = new FormData()
@@ -210,7 +206,7 @@ const isWorkingHours = computed(() => {
 })
 
 const isSubmitDisabled = computed(() => {
-    return isSubmitting.value || !newTicket.value.media_before || !isWorkingHours.value
+    return isSubmitting.value || !isWorkingHours.value
 })
 
 onMounted(() => {
@@ -262,11 +258,11 @@ onUnmounted(() => {
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео) <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео) <span class="text-secondary opacity-50 small">(по желанию)</span></label>
                             
                             <div 
                                 class="upload-zone mb-2"
-                                :class="{ 'is-dragging': isDragging, 'border-danger': !newTicket.media_before && !isDragging }"
+                                :class="{ 'is-dragging': isDragging }"
                                 @dragover.prevent="isDragging = true"
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
@@ -275,7 +271,7 @@ onUnmounted(() => {
                                 <div v-if="!mediaPreview" class="text-center py-4 text-muted">
                                     <i class="bi bi-cloud-upload display-6 mb-2 d-block"></i>
                                     <span class="small">Нажмите или перетащите файл сюда</span>
-                                    <div class="text-danger small mt-1" v-if="!newTicket.media_before">* Обязательно</div>
+                                    <div class="text-muted small mt-1">Фото можно загрузить по желанию</div>
                                 </div>
                                 <div v-else class="position-relative h-100 d-flex justify-content-center align-items-center bg-light rounded">
                                     <span class="text-success fw-bold">Файл выбран</span>

@@ -175,8 +175,9 @@ onMounted(() => {
 
                             <!-- Finish Form -->
                             <div v-if="reportData.id === ticket.id" class="mt-2">
+                                <div class="form-text small mb-1">Фото (по желанию):</div>
                                 <input type="file" @change="handleReportImage" class="form-control form-control-sm mb-1" accept="image/*">
-                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий (опционально)"></textarea>
+                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий к выполнению" required></textarea>
                                 <button class="btn btn-sm btn-success w-100" @click="submitReport">Отправить отчет</button>
                             </div>
                         </div>
