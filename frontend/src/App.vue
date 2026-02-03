@@ -8,8 +8,8 @@ const authStore = useAuthStore()
 const router = useRouter()
 const isMobileMenuOpen = ref(false)
 
-const logout = () => {
-  authStore.logout()
+const logout = async () => {
+  await authStore.logout()
   isMobileMenuOpen.value = false
 }
 

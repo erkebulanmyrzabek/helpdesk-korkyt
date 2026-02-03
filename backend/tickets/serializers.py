@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Ticket, Corpus, Feedback
+from .models import User, Ticket, Corpus, Feedback, SystemSetting
 
 class CorpusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,5 +50,8 @@ class TicketSerializer(serializers.ModelSerializer):
     
     def get_duration_minutes(self, obj):
         return obj.get_duration()
-    
 
+class SystemSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemSetting
+        fields = '__all__'

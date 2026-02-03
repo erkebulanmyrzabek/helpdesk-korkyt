@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Corpus, User, Ticket, Feedback
+from .models import Corpus, User, Ticket, Feedback, SystemSetting
+
+@admin.register(SystemSetting)
+class SystemSettingAdmin(admin.ModelAdmin):
+    list_display = ('work_start_time', 'work_end_time', 'allow_outside_working_hours')
+    
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
 
 @admin.register(Corpus)
 class CorpusAdmin(admin.ModelAdmin):

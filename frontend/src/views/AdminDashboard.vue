@@ -219,6 +219,9 @@ onMounted(() => {
                 <router-link to="/admin/reviews" class="btn btn-outline-primary">
                     <i class="bi bi-star me-1"></i>Отзывы
                 </router-link>
+                <router-link to="/admin/settings" class="btn btn-outline-primary">
+                    <i class="bi bi-gear me-1"></i>Настройки
+                </router-link>
             </div>
         </div>
         

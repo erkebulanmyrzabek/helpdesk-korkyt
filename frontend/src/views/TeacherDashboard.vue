@@ -16,6 +16,7 @@ const fileInputMedia = ref(null)
 const mediaPreview = ref(null)
 const isDragging = ref(false)
 const isSubmitting = ref(false)
+const sysSettings = ref(null)
 
 const fetchTickets = async () => {
     const response = await axios.get('tickets/')
@@ -25,6 +26,15 @@ const fetchTickets = async () => {
 const fetchCorpuses = async () => {
     const response = await axios.get('corpuses/')
     corpuses.value = response.data
+}
+
+const fetchSysSettings = async () => {
+    try {
+        const response = await axios.get('settings/current/')
+        sysSettings.value = response.data
+    } catch (error) {
+        console.error('Failed to fetch system settings:', error)
+    }
 }
 
 const setFile = (file) => {
@@ -175,13 +185,38 @@ const cleanComment = (comment) => {
     return comment.replace(/\[.*?\] .*?: /g, '').trim()
 }
 
+const isWorkingHours = computed(() => {
+    if (!sysSettings.value) return true
+    if (sysSettings.value.allow_outside_working_hours) return true
+    
+    const now = new Date()
+    const almatyTime = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Almaty',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+    }).format(now)
+    
+    const [h, m] = almatyTime.split(':').map(Number)
+    const currentMinutes = h * 60 + m
+    
+    const [startH, startM] = sysSettings.value.work_start_time.split(':').map(Number)
+    const startMinutes = startH * 60 + startM
+    
+    const [endH, endM] = sysSettings.value.work_end_time.split(':').map(Number)
+    const endMinutes = endH * 60 + endM
+    
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes
+})
+
 const isSubmitDisabled = computed(() => {
-    return isSubmitting.value || !newTicket.value.media_before
+    return isSubmitting.value || !newTicket.value.media_before || !isWorkingHours.value
 })
 
 onMounted(() => {
     fetchTickets()
     fetchCorpuses()
+    fetchSysSettings()
 })
 
 onUnmounted(() => {
@@ -198,6 +233,11 @@ onUnmounted(() => {
                     <Clock />
                 </div>
                 <div class="card-body">
+                    <div v-if="!isWorkingHours" class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Заявки принимаются только в рабочее время: 
+                        <strong>{{ sysSettings?.work_start_time.substring(0, 5) }} — {{ sysSettings?.work_end_time.substring(0, 5) }}</strong>
+                    </div>
                     <form @submit.prevent="createTicket">
                         <div class="mb-3">
                             <label class="form-label text-muted">Заголовок</label>

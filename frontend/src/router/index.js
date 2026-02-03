@@ -4,6 +4,7 @@ import TeacherDashboard from '../views/TeacherDashboard.vue'
 import HelpdeskDashboard from '../views/HelpdeskDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import AdminReviews from '../views/AdminReviews.vue'
+import AdminSettings from '../views/AdminSettings.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -40,6 +41,12 @@ const router = createRouter({
       path: '/admin/reviews',
       name: 'admin-reviews',
       component: AdminReviews,
+      meta: { requiresAuth: true, role: 'admin' }
+    },
+    {
+      path: '/admin/settings',
+      name: 'admin-settings',
+      component: AdminSettings,
       meta: { requiresAuth: true, role: 'admin' }
     }
   ]

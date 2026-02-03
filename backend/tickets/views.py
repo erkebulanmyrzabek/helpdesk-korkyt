@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Ticket, User, Corpus, Feedback
-from .serializers import TicketSerializer, UserSerializer, CorpusSerializer, FeedbackSerializer
+from .models import Ticket, User, Corpus, Feedback, SystemSetting
+from .serializers import TicketSerializer, UserSerializer, CorpusSerializer, FeedbackSerializer, SystemSettingSerializer
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
 import logging
@@ -72,13 +72,17 @@ class TicketViewSet(viewsets.ModelViewSet):
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
-        # Time Restriction: 09:00 - 18:00 (Almaty Time)
-        now_utc = timezone.now()
-        almaty_tz = pytz.timezone('Asia/Almaty')
-        now_local = now_utc.astimezone(almaty_tz)
-        
-        if not (9 <= now_local.hour < 18):
-             raise ValidationError({"detail": "Заявки принимаются только с 09:00 до 18:00."})
+        # Time Restriction from Database
+        sys_settings = SystemSetting.get_settings()
+        if not sys_settings.allow_outside_working_hours:
+            now_utc = timezone.now()
+            almaty_tz = pytz.timezone('Asia/Almaty')
+            now_local = now_utc.astimezone(almaty_tz).time()
+            
+            if not (sys_settings.work_start_time <= now_local <= sys_settings.work_end_time):
+                 raise ValidationError({
+                     "detail": f"Заявки принимаются только с {sys_settings.work_start_time.strftime('%H:%M')} до {sys_settings.work_end_time.strftime('%H:%M')}."
+                 })
 
         ticket = serializer.save(author=self.request.user)
         
@@ -126,13 +130,19 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.taken_at = timezone.now()
         ticket.started_at = timezone.now()
         
-        # Set Deadline: Today 18:00
+        # Set Deadline: Current Day End Time from Settings
+        sys_settings = SystemSetting.get_settings()
         now = timezone.now()
-        deadline = now.replace(hour=18, minute=0, second=0, microsecond=0)
-        if now > deadline:
-            pass
-        ticket.deadline = deadline
+        almaty_tz = pytz.timezone('Asia/Almaty')
+        now_local = now.astimezone(almaty_tz)
         
+        deadline_local = now_local.replace(
+            hour=sys_settings.work_end_time.hour,
+            minute=sys_settings.work_end_time.minute,
+            second=0, microsecond=0
+        )
+        
+        ticket.deadline = deadline_local
         ticket.save()
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
@@ -340,3 +350,18 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class SystemSettingViewSet(viewsets.ModelViewSet):
+    queryset = SystemSetting.objects.all()
+    serializer_class = SystemSettingSerializer
+    
+    def get_permissions(self):
+        if self.action in ['update', 'partial_update', 'create', 'destroy']:
+            return [permissions.IsAuthenticated(), IsAdmin()]
+        return [permissions.IsAuthenticated()]
+
+    @action(detail=False, methods=['get'])
+    def current(self, request):
+        settings = SystemSetting.get_settings()
+        serializer = self.get_serializer(settings)
+        return Response(serializer.data)

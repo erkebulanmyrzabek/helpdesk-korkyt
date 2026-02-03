@@ -91,3 +91,20 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Отзыв к заявке #{self.ticket.id} - {self.rating}"
+
+class SystemSetting(models.Model):
+    work_start_time = models.TimeField("Начало работы", default="09:00")
+    work_end_time = models.TimeField("Конец работы", default="18:00")
+    allow_outside_working_hours = models.BooleanField("Разрешить заявки вне рабочего времени", default=False)
+
+    class Meta:
+        verbose_name = "Настройка системы"
+        verbose_name_plural = "Настройки системы"
+
+    @classmethod
+    def get_settings(cls):
+        obj, created = cls.objects.get_or_create(id=1)
+        return obj
+
+    def __str__(self):
+        return "Настройки системы"

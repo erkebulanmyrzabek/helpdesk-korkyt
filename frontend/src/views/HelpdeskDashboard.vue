@@ -29,9 +29,18 @@ const fetchTickets = async () => {
 
 
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
-const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS'))
-const waitingTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'WAITING_APPROVE'))
-const completedTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED'))
+const myTickets = computed(() => {
+    if (!authStore.user) return []
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS')
+})
+const waitingTickets = computed(() => {
+    if (!authStore.user) return []
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'WAITING_APPROVE')
+})
+const completedTickets = computed(() => {
+    if (!authStore.user) return []
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED')
+})
 
 const takeTicket = async (id) => {
     try {

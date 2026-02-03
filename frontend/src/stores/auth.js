@@ -19,27 +19,27 @@ export const useAuthStore = defineStore('auth', {
                 const response = await axios.post('api-token-auth/', { username, password })
                 this.token = response.data.token;
                 localStorage.setItem('token', this.token);
-                
+
                 const userResponse = await axios.get('users/me/');
                 this.user = userResponse.data;
                 localStorage.setItem('user', JSON.stringify(this.user));
-                
+
                 // Redirect based on role
                 if (this.isTeacher) router.push('/teacher');
                 else if (this.isHelpdesk) router.push('/helpdesk');
                 else if (this.isAdmin) router.push('/admin');
-                
+
             } catch (error) {
                 console.error("Login failed", error);
                 throw error;
             }
         },
-        logout() {
+        async logout() {
+            await router.push('/login');
             this.user = null;
             this.token = null;
             localStorage.removeItem('user');
             localStorage.removeItem('token');
-            router.push('/login');
         }
     }
 })
