@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Ticket, Corpus, Feedback, SystemSetting
+from .models import User, Ticket, Corpus, Feedback, SystemSetting, EmailTemplate, EmailLog
 
 class CorpusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,4 +54,15 @@ class TicketSerializer(serializers.ModelSerializer):
 class SystemSettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SystemSetting
+        fields = '__all__'
+
+class EmailTemplateSerializer(serializers.ModelSerializer):
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    class Meta:
+        model = EmailTemplate
+        fields = '__all__'
+
+class EmailLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailLog
         fields = '__all__'

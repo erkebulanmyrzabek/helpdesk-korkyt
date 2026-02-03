@@ -1,8 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
-from tickets.models import Ticket
+from tickets.models import Ticket, SystemSetting
+from tickets.services.email_service import EmailService
 
 class Command(BaseCommand):
     help = 'Checks for overdue tickets and sends notifications'
@@ -14,29 +13,24 @@ class Command(BaseCommand):
             is_overdue=False
         ).exclude(status__in=['CLOSED', 'UNFIXABLE'])
 
+        sys_settings = SystemSetting.get_settings()
         count = 0
         for ticket in overdue_tickets:
             ticket.is_overdue = True
             ticket.save()
             count += 1
             
-            # Send email
-            try:
-                subject = f'ПРОСРОЧЕНО: Заявка #{ticket.id}'
-                message = f"Заявка #{ticket.id} просрочена.\nДедлайн: {ticket.deadline}\nИсполнитель: {ticket.assigned_to}"
-                
-                recipients = ['adfs7845@gmail.com']
-                if ticket.assigned_to and ticket.assigned_to.email:
-                    recipients.append(ticket.assigned_to.email)
-
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    recipients,
-                    fail_silently=True
-                )
-            except Exception:
-                pass
+            # Send email via Service
+            context = {
+                'ticket_id': ticket.id,
+                'deadline': ticket.deadline.strftime('%d.%m.%Y %H:%M') if ticket.deadline else '-',
+                'helper_name': (ticket.assigned_to.first_name + ' ' + ticket.assigned_to.last_name).strip() or ticket.assigned_to.username if ticket.assigned_to else 'Не назначен'
+            }
+            
+            recipients = [sys_settings.overdue_notification_email]
+            if ticket.assigned_to and ticket.assigned_to.email:
+                recipients.append(ticket.assigned_to.email)
+            
+            EmailService.send_notification('ticket_overdue', context, recipients)
 
         self.stdout.write(self.style.SUCCESS(f'Successfully marked {count} tickets as overdue'))

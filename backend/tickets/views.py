@@ -5,9 +5,14 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
+from tickets.services.email_service import EmailService
 from django.conf import settings
-from .models import Ticket, User, Corpus, Feedback, SystemSetting
-from .serializers import TicketSerializer, UserSerializer, CorpusSerializer, FeedbackSerializer, SystemSettingSerializer
+from .models import Ticket, User, Corpus, Feedback, SystemSetting, EmailTemplate, EmailLog
+from .serializers import (
+    TicketSerializer, UserSerializer, CorpusSerializer, 
+    FeedbackSerializer, SystemSettingSerializer,
+    EmailTemplateSerializer, EmailLogSerializer
+)
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
 import logging
@@ -101,37 +106,22 @@ class TicketViewSet(viewsets.ModelViewSet):
 
         ticket = serializer.save(author=self.request.user)
         
-        # Send email logic
-        try:
-            subject = f'Новая заявка #{ticket.id} в корпусе {ticket.building}'
-            message = f"""Новая заявка от {ticket.author.username}
-
-Заголовок: {ticket.title}
-Описание: {ticket.description}
-
-Корпус: {ticket.building}
-Кабинет: {ticket.room}
-
-Перейти к заявке: http://localhost:5173/helpdesk"""
-            
-            # Targeted Notification Logic
-            # Find helpdesk users assigned to this building
-            recipient_list = []
-            
-            # Targeted Notification Logic: Now sends to all helpdesk users
-            helpdesk_users = User.objects.filter(role='helpdesk')
-            recipient_list = [u.email for u in helpdesk_users if u.email]
-            
-            if recipient_list:
-                send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=recipient_list,
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Failed to send email: {e}")
+        # Send email logic via Service
+        context = {
+            'ticket_id': ticket.id,
+            'title': ticket.title,
+            'description': ticket.description,
+            'building': ticket.building,
+            'room': ticket.room,
+            'user_name': ticket.author.username,
+            'dashboard_link': 'http://localhost:5173/helpdesk'
+        }
+        
+        helpdesk_users = User.objects.filter(role='helpdesk')
+        recipient_list = [u.email for u in helpdesk_users if u.email]
+        
+        if recipient_list:
+            EmailService.send_notification('new_ticket', context, recipient_list)
 
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def take(self, request, pk=None):
@@ -181,31 +171,17 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.is_overdue = False # Reset overdue if extended
         ticket.save()
 
-        # Send Email Notification to Author
-        try:
-            if ticket.author.email:
-                subject = f"Обновление по заявке #{ticket.id}"
-                helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-                
-                message = f"""Здравствуйте!
-                
-Хелпер {helper_name} оставил комментарий к вашей заявке #{ticket.id}:
-
-"{comment}"
-
-Дедлайн продлен на 7 дней.
-
-Перейти к заявке: http://localhost:5173/helpdesk"""
-                
-                send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[ticket.author.email],
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Failed to send comment email: {e}")
+        # Send Email Notification via Service
+        if ticket.author.email:
+            helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            context = {
+                'ticket_id': ticket.id,
+                'title': ticket.title,
+                'comment': comment,
+                'helper_name': helper_name,
+                'dashboard_link': 'http://localhost:5173/helpdesk'
+            }
+            EmailService.send_notification('comment_added', context, [ticket.author.email])
         
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
@@ -223,33 +199,18 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.completed_at = timezone.now() # Technically finished work, waiting approve
         ticket.save()
 
-        # Send Email Notification to Author
-        try:
-            if ticket.author.email:
-                subject = f"Заявка выполнена: {ticket.title}"
-                resolution = ticket.report_comment or 'Комментарий отсутствует'
-                helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-                
-                message = f"""Здравствуйте!
-
-Работа по вашей заявке '{ticket.title}' была завершена.
-Исполнитель: {helper_name}
-
-📄 Отчет о выполнении:
-{resolution}
-
-Пожалуйста, войдите в систему, чтобы подтвердить выполнение и оценить работу мастера.
-http://localhost:5173/helpdesk"""
-                
-                send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[ticket.author.email],
-                    fail_silently=False,
-                )
-        except Exception as e:
-            logger.error(f"Failed to send completion email: {e}")
+        # Send Email Notification via Service
+        if ticket.author.email:
+            resolution = ticket.report_comment or 'Комментарий отсутствует'
+            helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
+            context = {
+                'ticket_id': ticket.id,
+                'title': ticket.title,
+                'resolution': resolution,
+                'helper_name': helper_name,
+                'dashboard_link': 'http://localhost:5173/helpdesk'
+            }
+            EmailService.send_notification('ticket_completed', context, [ticket.author.email])
 
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
@@ -378,3 +339,54 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         settings = SystemSetting.get_settings()
         serializer = self.get_serializer(settings)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAdmin])
+    def send_test_email(self, request):
+        to_email = request.data.get('to_email')
+        if not to_email:
+            return Response({'error': 'Email получателя обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Test context
+        context = {
+            'ticket_id': 'TEST-123',
+            'title': 'Тестовая заявка',
+            'description': 'Это тестовое уведомление для проверки настроек SMTP.',
+            'building': 'Главный корпус',
+            'room': '101',
+            'user_name': request.user.username,
+            'dashboard_link': 'http://localhost:5173',
+            'helper_name': 'Система',
+            'comment': 'Тестовый комментарий',
+            'resolution': 'Проблема успешно решена (тест)'
+        }
+        
+        # We try to send a 'new_ticket' template as a test
+        # Note: In a real scenario, we might want to use EmailService.process_send directly
+        # but here we use the task entry point to verify the whole chain if task is async
+        # Let's use process_send directly to give immediate feedback in the UI for the TEST button
+        success = EmailService.process_send('new_ticket', context, [to_email])
+        
+        if success:
+            return Response({'message': f'Тестовое письмо успешно отправлено на {to_email}'})
+        else:
+            return Response({'error': 'Ошибка при отправке письма. Проверьте логи писем и настройки SMTP.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class EmailTemplateViewSet(viewsets.ModelViewSet):
+    queryset = EmailTemplate.objects.all()
+    serializer_class = EmailTemplateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+class EmailLogViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = EmailLog.objects.all()
+    serializer_class = EmailLogSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        to_email = self.request.query_params.get('to_email')
+        if to_email:
+            queryset = queryset.filter(to_email__icontains=to_email)
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
