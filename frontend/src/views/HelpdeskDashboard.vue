@@ -11,10 +11,7 @@ const reportData = ref({
     comment: '',
     media_after: null
 })
-const commentData = ref({
-    id: null,
-    text: ''
-})
+
 const currentTime = ref(new Date())
 
 const fetchTickets = async () => {
@@ -31,11 +28,16 @@ const fetchTickets = async () => {
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
 const myTickets = computed(() => {
     if (!authStore.user) return []
-    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS')
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && (t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS'))
 })
 const completedTickets = computed(() => {
     if (!authStore.user) return []
     return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED')
+})
+
+const needPartsData = ref({
+    id: null,
+    comment: ''
 })
 
 const takeTicket = async (id) => {
@@ -49,13 +51,19 @@ const takeTicket = async (id) => {
 
 
 
-const addComment = async () => {
+
+
+const submitNeedParts = async () => {
+    if (!needPartsData.value.comment) {
+        alert('Комментарий обязателен')
+        return
+    }
     try {
-        await axios.post(`tickets/${commentData.value.id}/add_comment/`, {
-            comment: commentData.value.text
+        await axios.post(`tickets/${needPartsData.value.id}/need-parts/`, {
+            comment: needPartsData.value.comment
         })
-        commentData.value.id = null
-        commentData.value.text = ''
+        needPartsData.value.id = null
+        needPartsData.value.comment = ''
         fetchTickets()
     } catch (error) {
         alert(error.response?.data?.error || 'Ошибка')
@@ -67,10 +75,7 @@ const handleReportImage = (event) => {
 }
 
 const submitReport = async () => {
-    if (!reportData.value.comment) {
-        alert('Отчет о выполнении (комментарий) обязателен.')
-        return
-    }
+
     const formData = new FormData()
     formData.append('report_comment', reportData.value.comment)
     if (reportData.value.media_after) formData.append('media_after', reportData.value.media_after)
@@ -148,33 +153,40 @@ onMounted(() => {
                         <div v-for="ticket in myTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <div class="small text-muted mb-2">
-                                {{ ticket.building }}, {{ ticket.room }} ({{ ticket.status }})
+                                {{ ticket.building }}, {{ ticket.room }} 
+                                <span v-if="ticket.status === 'WAITING_FOR_PARTS'" class="badge bg-info text-dark">Ожидается запчасть</span>
+                                <span v-else>({{ ticket.status }})</span>
                             </div>
                             
 
-
                             <!-- Actions -->
-                            <div class="d-flex gap-2 mt-2">
-                                <button class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
-                                    Комментарий
+                            <div class="d-flex gap-2 mt-2 flex-wrap">
+
+                                <button v-if="ticket.status !== 'WAITING_FOR_PARTS'" class="btn btn-sm btn-dark" @click="needPartsData.id = ticket.id">
+                                    ⏳ Требуется запчасть
                                 </button>
                                 <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
                             </div>
 
-                            <!-- Comment Form -->
-                            <div v-if="commentData.id === ticket.id" class="mt-2">
-                                <textarea v-model="commentData.text" class="form-control form-control-sm mb-1" placeholder="Комментарий (продлит дедлайн)"></textarea>
-                                <button class="btn btn-sm btn-primary" @click="addComment">Отправить</button>
+
+                            
+                            <!-- Need Parts Form -->
+                            <div v-if="needPartsData.id === ticket.id" class="mt-2 text-start p-2 bg-light rounded border border-warning">
+                                <small class="fw-bold text-dark d-block mb-1">Запрос запчастей:</small>
+                                <textarea v-model="needPartsData.comment" class="form-control form-control-sm mb-1" placeholder="Какая запчасть требуется? (Обязательно)" required></textarea>
+                                <button class="btn btn-sm btn-secondary me-1" @click="needPartsData.id = null">Отмена</button>
+                                <button class="btn btn-sm btn-warning" @click="submitNeedParts">Отправить запрос</button>
                             </div>
 
                             <!-- Finish Form -->
-                            <div v-if="reportData.id === ticket.id" class="mt-2">
+                            <div v-if="reportData.id === ticket.id" class="mt-2 text-start p-2 bg-light rounded border border-success">
                                 <div class="form-text small mb-1">Фото (по желанию):</div>
                                 <input type="file" @change="handleReportImage" class="form-control form-control-sm mb-1" accept="image/*">
-                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий к выполнению" required></textarea>
-                                <button class="btn btn-sm btn-success w-100" @click="submitReport">Отправить отчет</button>
+                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий к выполнению (необязательно)"></textarea>
+                                <button class="btn btn-sm btn-secondary me-1" @click="reportData.id = null">Отмена</button>
+                                <button class="btn btn-sm btn-success" @click="submitReport">Отправить отчет</button>
                             </div>
                         </div>
                     </div>

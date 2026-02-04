@@ -31,6 +31,7 @@ class Ticket(models.Model):
     STATUS_CHOICES = (
         ('NEW', 'Новая'),
         ('IN_PROGRESS', 'В работе'),
+        ('WAITING_FOR_PARTS', 'Ожидается запчасть'),
         ('CLOSED', 'Закрыта'),
         ('UNFIXABLE', 'Неисправима'),
     )
@@ -53,6 +54,7 @@ class Ticket(models.Model):
     # Report by Helpdesk
     media_after = models.ImageField("Фото (После)", upload_to='tickets/after/', null=True, blank=True)
     report_comment = models.TextField("Комментарий к выполнению", null=True, blank=True)
+    parts_wait_reason = models.TextField("Причина ожидания запчастей", null=True, blank=True)
     
     # Timing fields
     created_at = models.DateTimeField(auto_now_add=True)

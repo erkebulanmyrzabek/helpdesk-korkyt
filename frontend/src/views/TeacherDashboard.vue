@@ -148,6 +148,7 @@ const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
         case 'IN_PROGRESS': return 'badge bg-warning text-dark';
+        case 'WAITING_FOR_PARTS': return 'badge bg-info text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
         case 'UNFIXABLE': return 'badge bg-danger';
@@ -159,6 +160,7 @@ const getStatusText = (status) => {
     const map = {
         'NEW': 'Новая',
         'IN_PROGRESS': 'В работе',
+        'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
         'UNFIXABLE': 'Неисправима'
@@ -310,6 +312,9 @@ onUnmounted(() => {
                         <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
                     </div>
                     <p class="mb-2 text-secondary">{{ ticket.description }}</p>
+                     <div v-if="ticket.status === 'WAITING_FOR_PARTS' && ticket.parts_wait_reason" class="alert alert-info py-2 px-3 mb-2 small">
+                        <strong><i class="bi bi-info-circle me-1"></i>Статус запчастей:</strong> {{ ticket.parts_wait_reason }}
+                    </div>
                     <div class="d-flex align-items-center text-muted small mb-3">
                         <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.building }}</span>
                         <span class="me-3"><i class="bi bi-door-open me-1"></i>{{ ticket.room }}</span>

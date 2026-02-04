@@ -131,20 +131,28 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.save()
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
-    def add_comment(self, request, pk=None):
+
+
+    @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk], url_path='need-parts')
+    def need_parts(self, request, pk=None):
         ticket = self.get_object()
         
-        comment = request.data.get('comment')
+        # Check permissions: must be assigned to this user
+        if ticket.assigned_to != request.user:
+             return Response({'error': 'Вы не исполнитель этой заявки'}, status=status.HTTP_403_FORBIDDEN)
         
+        # Check status transition
+        if ticket.status != 'IN_PROGRESS':
+            return Response({'error': 'Заявка должна быть в работе'}, status=status.HTTP_400_BAD_REQUEST)
+
+        comment = request.data.get('comment')
         if not comment:
             return Response({'error': 'Комментарий обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set parts wait reason
+        ticket.parts_wait_reason = comment
         
-        ticket.report_comment = f"{ticket.report_comment or ''}\n[{timezone.now()}] {request.user.username}: {comment}"
-        
-        # Extend deadline by 7 days
-        ticket.deadline = timezone.now() + datetime.timedelta(days=7)
-        ticket.is_overdue = False # Reset overdue if extended
+        ticket.status = 'WAITING_FOR_PARTS'
         ticket.save()
         
         return Response(TicketSerializer(ticket, context={'request': request}).data)
@@ -160,8 +168,22 @@ class TicketViewSet(viewsets.ModelViewSet):
             ticket.media_after = request.FILES['media_after']
             
         comment = request.data.get('comment')
+        # Comment is optional now. If present, set it as report_comment.
+        # Logic: Show ONLY the comment entered here.
         if comment:
-            ticket.report_comment = f"{ticket.report_comment or ''}\n[{timezone.now()}] {request.user.username} (Закрытие): {comment}"
+            ticket.report_comment = comment
+        elif 'report_comment' in request.data: # Allow clearing it explicitly if passed as empty string
+             ticket.report_comment = ''
+        
+        # Note: If comment is not provided, we don't necessarily clear it unless we want to "reset" it.
+        # But requirement says "After closing user sees ONLY comment from Finish".
+        # So if I send empty comment, I should probably store empty comment.
+        # Let's assume if it is sent, we take it.
+        
+        # Wait, if I submitted parts_wait_reason before, report_comment might be empty or old.
+        # The prompt says: "If at closing comment is not entered -> show nothing".
+        # So I should probably set report_comment to the comment (even if empty).
+        ticket.report_comment = comment if comment else None
 
         ticket.status = 'CLOSED'
         ticket.completed_at = timezone.now()

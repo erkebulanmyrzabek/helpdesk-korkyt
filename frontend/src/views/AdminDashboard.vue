@@ -173,6 +173,7 @@ const getStatusLabel = (status) => {
     const map = {
         'NEW': 'Новая',
         'IN_PROGRESS': 'В работе',
+        'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
         'UNFIXABLE': 'Неисправима'
@@ -184,6 +185,7 @@ const getStatusColor = (status) => {
     switch(status) {
         case 'NEW': return 'bg-success';
         case 'IN_PROGRESS': return 'bg-warning text-dark';
+        case 'WAITING_FOR_PARTS': return 'bg-info text-dark';
         case 'WAITING_APPROVE': return 'bg-primary';
         case 'CLOSED': return 'bg-secondary';
         case 'UNFIXABLE': return 'bg-danger';
@@ -345,6 +347,7 @@ onMounted(() => {
                                 <option value="">Все статусы</option>
                                 <option value="NEW">Новая</option>
                                 <option value="IN_PROGRESS">В работе</option>
+                                <option value="WAITING_FOR_PARTS">Ожидается запчасть</option>
                                 <option value="WAITING_APPROVE">Ожидает</option>
                                 <option value="CLOSED">Закрыта</option>
                                 <option value="UNFIXABLE">Неисправима</option>
