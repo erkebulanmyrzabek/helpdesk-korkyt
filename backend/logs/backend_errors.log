@@ -14,3 +14,100 @@ INFO 2026-02-04 13:26:55,771 basehttp "GET /api/settings/current/ HTTP/1.1" 200 
 INFO 2026-02-04 13:26:55,787 basehttp "GET /api/tickets/ HTTP/1.1" 200 8098
 INFO 2026-02-04 13:27:21,307 basehttp "POST /api/tickets/ HTTP/1.1" 201 458
 INFO 2026-02-04 13:27:21,351 basehttp "GET /api/tickets/ HTTP/1.1" 200 8557
+INFO 2026-02-04 13:30:06,097 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 13:31:16,381 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 13:31:16,392 basehttp "GET /api/users/me/ HTTP/1.1" 200 136
+INFO 2026-02-04 13:31:16,471 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 363
+INFO 2026-02-04 13:31:16,507 basehttp "GET /api/users/ HTTP/1.1" 200 751
+INFO 2026-02-04 13:31:16,540 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 13:31:16,606 basehttp "GET /api/tickets/ HTTP/1.1" 200 1930
+INFO 2026-02-04 13:31:18,221 basehttp "GET /api/settings/current/ HTTP/1.1" 200 100
+INFO 2026-02-04 13:31:18,222 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 13:31:28,108 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 13:31:28,123 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 13:31:28,153 basehttp "GET /api/settings/current/ HTTP/1.1" 200 100
+INFO 2026-02-04 13:31:28,165 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 13:31:28,176 basehttp "GET /api/tickets/ HTTP/1.1" 200 957
+INFO 2026-02-04 13:31:35,539 basehttp "POST /api/tickets/ HTTP/1.1" 201 459
+INFO 2026-02-04 13:31:35,566 basehttp "GET /api/tickets/ HTTP/1.1" 200 1417
+WARNING 2026-02-04 14:22:34,484 log Bad Request: /api/tickets/1/leave_feedback/
+WARNING 2026-02-04 14:22:38,280 log Bad Request: /api/tickets/1/leave_feedback/
+ERROR 2026-02-04 14:22:44,680 log Internal Server Error: /api/tickets/1/take/
+Traceback (most recent call last):
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\rest_framework\viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\Adilzhan\AppData\Local\Programs\Python\Python312\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\helpdesk\helpdsk\helpdesk-korkyt\backend\tickets\views.py", line 119, in take
+    hour=sys_settings.work_end_time.hour,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'hour'
+WARNING 2026-02-04 14:23:31,299 log Bad Request: /api/tickets/1/leave_feedback/
+WARNING 2026-02-04 14:23:35,138 log Bad Request: /api/tickets/1/leave_feedback/
+INFO 2026-02-04 14:25:10,463 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 14:26:08,860 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 14:26:08,875 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 14:26:08,956 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:26:08,963 basehttp "GET /api/settings/current/ HTTP/1.1" 200 100
+INFO 2026-02-04 14:26:09,014 basehttp "GET /api/tickets/ HTTP/1.1" 200 1417
+INFO 2026-02-04 14:26:10,756 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 14:26:10,773 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 14:26:36,908 basehttp "POST /api/tickets/ HTTP/1.1" 201 467
+INFO 2026-02-04 14:26:36,935 basehttp "GET /api/tickets/ HTTP/1.1" 200 1885
+INFO 2026-02-04 14:26:44,869 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 14:26:44,882 basehttp "GET /api/users/me/ HTTP/1.1" 200 136
+INFO 2026-02-04 14:26:44,939 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:26:44,959 basehttp "GET /api/users/ HTTP/1.1" 200 751
+INFO 2026-02-04 14:26:44,967 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 363
+INFO 2026-02-04 14:26:44,983 basehttp "GET /api/tickets/ HTTP/1.1" 200 2858
+INFO 2026-02-04 14:26:46,442 basehttp "GET /api/settings/current/ HTTP/1.1" 200 100
+INFO 2026-02-04 14:26:46,445 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:26:55,844 basehttp "GET /api/users/ HTTP/1.1" 200 751
+INFO 2026-02-04 14:26:55,849 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:26:55,860 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 363
+INFO 2026-02-04 14:26:55,880 basehttp "GET /api/tickets/ HTTP/1.1" 200 2858
+INFO 2026-02-04 14:27:13,564 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-04 14:27:13,578 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-04 14:27:13,618 basehttp "GET /api/tickets/ HTTP/1.1" 200 2858
+INFO 2026-02-04 14:27:16,434 basehttp "OPTIONS /api/tickets/28/take/ HTTP/1.1" 200 0
+INFO 2026-02-04 14:27:16,460 basehttp "POST /api/tickets/28/take/ HTTP/1.1" 200 589
+INFO 2026-02-04 14:27:16,490 basehttp "GET /api/tickets/ HTTP/1.1" 200 2980
+INFO 2026-02-04 14:27:42,549 basehttp "OPTIONS /api/tickets/28/complete/ HTTP/1.1" 200 0
+INFO 2026-02-04 14:27:42,579 basehttp "POST /api/tickets/28/complete/ HTTP/1.1" 200 611
+INFO 2026-02-04 14:27:42,615 basehttp "GET /api/tickets/ HTTP/1.1" 200 3002
+INFO 2026-02-04 14:27:51,328 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 14:27:51,340 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 14:27:51,372 basehttp "GET /api/settings/current/ HTTP/1.1" 200 100
+INFO 2026-02-04 14:27:51,373 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:27:51,401 basehttp "GET /api/tickets/ HTTP/1.1" 200 2029
+INFO 2026-02-04 14:28:05,534 basehttp "OPTIONS /api/tickets/28/leave_feedback/ HTTP/1.1" 200 0
+INFO 2026-02-04 14:28:05,577 basehttp "POST /api/tickets/28/leave_feedback/ HTTP/1.1" 200 29
+INFO 2026-02-04 14:28:05,608 basehttp "GET /api/tickets/ HTTP/1.1" 200 2229
+INFO 2026-02-04 14:28:13,812 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-04 14:28:13,823 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-04 14:28:13,870 basehttp "GET /api/tickets/ HTTP/1.1" 200 3202
+INFO 2026-02-04 14:28:24,599 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 14:28:24,611 basehttp "GET /api/users/me/ HTTP/1.1" 200 136
+INFO 2026-02-04 14:28:24,661 basehttp "GET /api/corpuses/ HTTP/1.1" 200 345
+INFO 2026-02-04 14:28:24,671 basehttp "GET /api/users/ HTTP/1.1" 200 751
+INFO 2026-02-04 14:28:24,681 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 362
+INFO 2026-02-04 14:28:24,696 basehttp "GET /api/tickets/ HTTP/1.1" 200 3202
+INFO 2026-02-04 14:28:32,951 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 402

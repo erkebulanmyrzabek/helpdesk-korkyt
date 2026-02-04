@@ -133,9 +133,9 @@ const closeRatingModal = () => {
 
 const submitRating = async () => {
     try {
-        await axios.post(`tickets/${ratingData.value.ticketId}/approve/`, {
+        await axios.post(`tickets/${ratingData.value.ticketId}/leave_feedback/`, {
             rating: ratingData.value.rating,
-            feedback: ratingData.value.feedback
+            comment: ratingData.value.feedback
         })
         closeRatingModal()
         fetchTickets()
@@ -326,38 +326,45 @@ onUnmounted(() => {
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
                     </div>
 
-                     <div v-if="ticket.status === 'WAITING_APPROVE'" class="mt-3 card border-warning mb-3">
-                        <div class="card-header bg-warning text-dark fw-bold">
-                            <i class="bi bi-flag-fill me-2"></i>🏁 Работа выполнена
-                        </div>
-                        <div class="card-body bg-warning bg-opacity-10">
-                            <div class="mb-2">
-                                <strong>Исполнитель:</strong> {{ ticket.assigned_to_username }}
-                            </div>
-                            <div class="mb-2">
-                                <strong>Время завершения:</strong> {{ formatDate(ticket.completed_at) }}
-                            </div>
-                            
-                            <div v-if="ticket.report_comment" class="mb-3 p-2 bg-white rounded border">
+                    <!-- NEW: Closed & Feedback Logic -->
+                    <div v-if="ticket.status === 'CLOSED'" class="mt-3">
+                        <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10 mb-2">
+                            <h6 class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
+                            <small class="text-muted" v-if="ticket.completed_at">
+                                Завершена: {{ formatDate(ticket.completed_at) }}
+                            </small>
+                             <!-- Report Comment Display -->
+                            <div v-if="ticket.report_comment" class="mt-2 p-2 bg-white rounded border">
                                 <small class="text-muted d-block mb-1">Комментарий исполнителя:</small>
                                 {{ cleanComment(ticket.report_comment) }}
                             </div>
-
-                            <div v-if="ticket.media_after" class="mb-3">
+                            <!-- Result Photo -->
+                             <div v-if="ticket.media_after" class="mt-2">
                                 <small class="text-muted d-block mb-1">Фото результата:</small>
                                 <a :href="ticket.media_after" target="_blank" class="d-inline-block border rounded overflow-hidden">
                                     <img :src="ticket.media_after" alt="Результат" style="height: 100px; object-fit: cover;">
                                 </a>
                             </div>
+                        </div>
 
-                            <button class="btn btn-success w-100 btn-lg shadow-sm" @click="confirmTicket(ticket.id)">
-                                <i class="bi bi-check-circle-fill me-2"></i>Подтвердить выполнение
+                        <!-- Feedback Section -->
+                        <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
+                             <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
+                             <div class="d-flex align-items-center mb-1">
+                                 <span class="text-warning me-2 fs-5">
+                                     {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
+                                 </span>
+                                 <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
+                             </div>
+                             <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
+                                 "{{ ticket.feedback.comment }}"
+                             </p>
+                        </div>
+                        <div v-else class="text-center">
+                            <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
+                                <i class="bi bi-star me-2"></i>Оценить работу
                             </button>
                         </div>
-                    </div>
-
-                     <div v-if="ticket.status === 'CLOSED'" class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
                     </div>
                 </div>
             </div>

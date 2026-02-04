@@ -33,10 +33,6 @@ const myTickets = computed(() => {
     if (!authStore.user) return []
     return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS')
 })
-const waitingTickets = computed(() => {
-    if (!authStore.user) return []
-    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'WAITING_APPROVE')
-})
 const completedTickets = computed(() => {
     if (!authStore.user) return []
     return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED')
@@ -185,17 +181,13 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Waiting Approval / Closed -->
+            <!-- Closed -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-success text-white border-bottom">
-                        <h5 class="mb-0">История / Ожидание</h5>
+                        <h5 class="mb-0">История</h5>
                     </div>
                     <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
-                        <div v-for="ticket in waitingTickets" :key="ticket.id" class="list-group-item p-3 bg-light">
-                            <h6 class="text-muted">#{{ ticket.id }} {{ ticket.title }}</h6>
-                            <span class="badge bg-warning text-dark">Ожидает подтверждения</span>
-                        </div>
                         <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="text-muted text-decoration-line-through">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <span class="badge bg-success mb-2">Закрыто</span>

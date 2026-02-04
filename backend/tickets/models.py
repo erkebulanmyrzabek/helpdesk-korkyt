@@ -31,7 +31,6 @@ class Ticket(models.Model):
     STATUS_CHOICES = (
         ('NEW', 'Новая'),
         ('IN_PROGRESS', 'В работе'),
-        ('WAITING_APPROVE', 'Ожидает подтверждения'),
         ('CLOSED', 'Закрыта'),
         ('UNFIXABLE', 'Неисправима'),
     )

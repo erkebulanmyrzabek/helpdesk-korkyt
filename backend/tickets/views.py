@@ -115,9 +115,15 @@ class TicketViewSet(viewsets.ModelViewSet):
         almaty_tz = pytz.timezone('Asia/Almaty')
         now_local = now.astimezone(almaty_tz)
         
+        end_time = sys_settings.work_end_time
+        if isinstance(end_time, str):
+            hour, minute = map(int, end_time.split(':')[:2])
+        else:
+            hour, minute = end_time.hour, end_time.minute
+            
         deadline_local = now_local.replace(
-            hour=sys_settings.work_end_time.hour,
-            minute=sys_settings.work_end_time.minute,
+            hour=hour,
+            minute=minute,
             second=0, microsecond=0
         )
         
@@ -152,48 +158,58 @@ class TicketViewSet(viewsets.ModelViewSet):
         # Check for media_after (Optional)
         if 'media_after' in request.FILES:
             ticket.media_after = request.FILES['media_after']
+            
+        comment = request.data.get('comment')
+        if comment:
+            ticket.report_comment = f"{ticket.report_comment or ''}\n[{timezone.now()}] {request.user.username} (Закрытие): {comment}"
 
-        ticket.status = 'WAITING_APPROVE'
-        ticket.completed_at = timezone.now() # Technically finished work, waiting approve
+        ticket.status = 'CLOSED'
+        ticket.completed_at = timezone.now()
         ticket.save()
 
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
-    def approve(self, request, pk=None):
+    def leave_feedback(self, request, pk=None):
         ticket = self.get_object()
         if ticket.author != request.user:
             return Response({'error': 'Вы не автор этой заявки'}, status=status.HTTP_403_FORBIDDEN)
         
-        if ticket.status != 'WAITING_APPROVE':
-            return Response({'error': 'Заявка не ожидает подтверждения'}, status=status.HTTP_400_BAD_REQUEST)
+        if ticket.status != 'CLOSED':
+            return Response({'error': 'Можно оставить отзыв только для закрытой заявки'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if hasattr(ticket, 'feedback'):
+             return Response({'error': 'Отзыв уже оставлен'}, status=status.HTTP_400_BAD_REQUEST)
             
         # Handle Feedback
         rating = request.data.get('rating')
-        comment = request.data.get('feedback')
+        comment = request.data.get('comment')
         
-        if rating:
-            try:
-                rating = float(rating)
-                if 1 <= rating <= 5:
-                    Feedback.objects.create(
-                        ticket=ticket,
-                        user=ticket.assigned_to, # Feedback is FOR the helper
-                        rating=rating,
-                        comment=comment
-                    )
-                    
-                    # Recalculate Helper Rating
-                    helper = ticket.assigned_to
+        if not rating:
+            return Response({'error': 'Оценка обязательна'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            rating = float(rating)
+            if 1 <= rating <= 5:
+                Feedback.objects.create(
+                    ticket=ticket,
+                    user=ticket.assigned_to, # Feedback is FOR the helper
+                    rating=rating,
+                    comment=comment
+                )
+                
+                # Recalculate Helper Rating
+                helper = ticket.assigned_to
+                if helper:
                     avg_rating = Feedback.objects.filter(user=helper).aggregate(Avg('rating'))['rating__avg']
-                    helper.rating = avg_rating
+                    helper.rating = avg_rating or 0.0
                     helper.save()
-            except ValueError:
-                pass # Ignore invalid rating
-
-        ticket.status = 'CLOSED'
-        ticket.save()
-        return Response(TicketSerializer(ticket, context={'request': request}).data)
+                    
+                return Response({'status': 'Feedback created'})
+            else:
+                 return Response({'error': 'Оценка должна быть от 1 до 5'}, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response({'error': 'Некорректный формат оценки'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdmin])
     def mark_unfixable(self, request, pk=None):
