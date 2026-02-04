@@ -13,23 +13,33 @@ class EmailService:
         This should be called from views/commands.
         It checks if notification is enabled and then enqueues the task.
         """
-        settings = SystemSetting.get_settings()
-        
-        # Check global toggle for this type
-        notify_map = {
-            'new_ticket': settings.notify_on_create,
-            'comment_added': settings.notify_on_comment,
-            'ticket_completed': settings.notify_on_complete,
-            'ticket_overdue': settings.notify_on_overdue,
-        }
-        
-        if not notify_map.get(template_type, True):
-            return False
+        try:
+            settings = SystemSetting.get_settings()
+            
+            # Check global toggle for this type
+            notify_map = {
+                'new_ticket': settings.notify_on_create,
+                'comment_added': settings.notify_on_comment,
+                'ticket_completed': settings.notify_on_complete,
+                'ticket_overdue': settings.notify_on_overdue,
+            }
+            
+            if not notify_map.get(template_type, True):
+                return False
 
-        # Enqueue the task (we'll define it in tasks.py)
-        from tickets.tasks import send_email_task
-        send_email_task.delay(template_type, context_data, recipients)
-        return True
+            # Enqueue the task
+            from tickets.tasks import send_email_task
+            try:
+                send_email_task.delay(template_type, context_data, recipients)
+            except Exception as e:
+                logger.error(f"Celery error: Could not enqueue email task ({template_type}). Broker might be down: {e}")
+                # Optional: Fallback to sync send if broker is down? 
+                # For now, we just log and continue to avoid 500 errors.
+            
+            return True
+        except Exception as e:
+            logger.error(f"Critical error in send_notification: {e}")
+            return False
 
     @staticmethod
     def process_send(template_type, context_data, recipients):

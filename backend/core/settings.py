@@ -152,6 +152,8 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_TIMEOUT = 2.0  # Долгий ответ исправлен: ограничиваем время ожидания брокера
 
 # Email settings (SMTP)
 # Используем кастомный backend для обхода проблем с SSL сертификатами на macOS
