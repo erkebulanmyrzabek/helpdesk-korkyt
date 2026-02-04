@@ -1,30 +1,15 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from '../axios'
 
 // Tabs
-const currentTab = ref('worktime') // 'worktime', 'buildings', or 'notifications'
+const currentTab = ref('worktime') // 'worktime', 'buildings'
 
 // System Settings
 const settings = ref({
     work_start_time: '09:00',
     work_end_time: '18:00',
     allow_outside_working_hours: false,
-    // SMTP & Email
-    email_from_name: 'HelpDesk',
-    email_from_address: '',
-    smtp_host: 'smtp.gmail.com',
-    smtp_port: 587,
-    smtp_user: '',
-    smtp_password: '',
-    smtp_use_tls: true,
-    smtp_use_ssl: false,
-    // Notify toggles
-    notify_on_create: true,
-    notify_on_comment: true,
-    notify_on_complete: true,
-    notify_on_overdue: true,
-    overdue_notification_email: ''
 })
 const isLoadingSettings = ref(false)
 const saveSuccess = ref(false)
@@ -34,23 +19,6 @@ const corpuses = ref([])
 const isLoadingCorpuses = ref(false)
 const showCorpusModal = ref(false)
 const editingCorpus = ref({ id: null, name: '' })
-
-// Notifications - Templates
-const templates = ref([])
-const isLoadingTemplates = ref(false)
-const selectedTemplateType = ref('new_ticket')
-
-// Notifications - Logs
-const logs = ref([])
-const isLoadingLogs = ref(false)
-const logSearch = ref('')
-const logStatus = ref('')
-const logPage = ref(1)
-
-// Test Email
-const testRecipient = ref('')
-const isSendingTest = ref(false)
-const testResult = ref(null)
 
 const fetchSettings = async () => {
     try {
@@ -123,72 +91,9 @@ const deleteCorpus = async (corpus) => {
     }
 }
 
-// Template Actions
-const fetchTemplates = async () => {
-    isLoadingTemplates.value = true
-    try {
-        const response = await axios.get('email-templates/')
-        templates.value = response.data
-    } catch (error) {
-        console.error('Failed to fetch templates:', error)
-    } finally {
-        isLoadingTemplates.value = false
-    }
-}
-
-const activeTemplate = computed(() => {
-    return templates.value.find(t => t.type === selectedTemplateType.value) || { subject: '', body: '', is_active: true }
-})
-
-const saveTemplate = async () => {
-    try {
-        const t = activeTemplate.value
-        await axios.patch(`email-templates/${t.id}/`, t)
-        alert('Шаблон сохранен')
-    } catch (error) {
-        console.error('Failed to save template:', error)
-        alert('Ошибка при сохранении шаблона')
-    }
-}
-
-// Log Actions
-const fetchLogs = async () => {
-    isLoadingLogs.value = true
-    try {
-        let url = 'email-logs/'
-        const params = new URLSearchParams()
-        if (logSearch.value) params.append('to_email', logSearch.value)
-        if (logStatus.value) params.append('status', logStatus.value)
-        
-        const response = await axios.get(`${url}?${params.toString()}`)
-        logs.value = response.data
-    } catch (error) {
-        console.error('Failed to fetch logs:', error)
-    } finally {
-        isLoadingLogs.value = false
-    }
-}
-
-// Test Email Actions
-const sendTestEmail = async () => {
-    if (!testRecipient.value) return
-    isSendingTest.value = true
-    testResult.value = null
-    try {
-        const response = await axios.post('settings/send_test_email/', { to_email: testRecipient.value })
-        testResult.value = { success: true, message: response.data.message }
-    } catch (error) {
-        testResult.value = { success: false, message: error.response?.data?.error || 'Ошибка при отправке теста' }
-    } finally {
-        isSendingTest.value = false
-    }
-}
-
 onMounted(() => {
     fetchSettings()
     fetchCorpuses()
-    fetchTemplates()
-    fetchLogs()
 })
 </script>
 
@@ -236,17 +141,6 @@ onMounted(() => {
                             <div>
                                 <div class="fw-bold">Здания</div>
                                 <div class="small opacity-75">Список корпусов университета</div>
-                            </div>
-                        </button>
-                        <button 
-                            class="list-group-item list-group-item-action border-0 rounded-3 d-flex align-items-center py-3 transition-all" 
-                            :class="{ 'bg-primary text-white shadow-sm': currentTab === 'notifications' }"
-                            @click="currentTab = 'notifications'"
-                        >
-                            <i class="bi bi-envelope-at me-3 fs-5"></i>
-                            <div>
-                                <div class="fw-bold">Уведомления</div>
-                                <div class="small" :class="currentTab === 'notifications' ? 'text-white-50' : 'text-muted'">Email и SMTP настройки</div>
                             </div>
                         </button>
                     </div>
@@ -353,243 +247,6 @@ onMounted(() => {
                                                         <i class="bi bi-trash text-danger"></i>
                                                     </button>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- NOTIFICATIONS TAB -->
-                <div v-if="currentTab === 'notifications'" class="animate-fade-in pb-5">
-                    <!-- SMTP Settings -->
-                    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 1rem;">
-                        <div class="card-header bg-white p-4 border-0">
-                            <h5 class="fw-bold mb-0"><i class="bi bi-server me-2 text-primary"></i>Настройки SMTP сервера</h5>
-                        </div>
-                        <div class="card-body p-4 pt-0">
-                            <form @submit.prevent="saveSettings">
-                                <div class="row g-4 mb-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">SMTP Host</label>
-                                        <input type="text" v-model="settings.smtp_host" class="form-control" placeholder="smtp.gmail.com">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-bold text-muted">Port</label>
-                                        <input type="number" v-model="settings.smtp_port" class="form-control" placeholder="587">
-                                    </div>
-                                    <div class="col-md-3 d-flex align-items-end mb-1">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="smtpTls" v-model="settings.smtp_use_tls">
-                                            <label class="form-check-label small" for="smtpTls">Use TLS</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">SMTP Username</label>
-                                        <input type="text" v-model="settings.smtp_user" class="form-control" placeholder="example@gmail.com">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">SMTP Password</label>
-                                        <input type="password" v-model="settings.smtp_password" class="form-control" placeholder="••••••••••••">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">From Address</label>
-                                        <input type="email" v-model="settings.email_from_address" class="form-control" placeholder="helpdesk@university.edu">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">From Name</label>
-                                        <input type="text" v-model="settings.email_from_name" class="form-control" placeholder="HelpDesk Korkyt">
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill">
-                                        Сохранить настройки
-                                    </button>
-                                    
-                                    <div class="input-group ms-auto" style="max-width: 400px;">
-                                        <input type="email" v-model="testRecipient" class="form-control border-primary" placeholder="Email для теста">
-                                        <button class="btn btn-primary px-3" type="button" @click="sendTestEmail" :disabled="isSendingTest || !testRecipient">
-                                            <span v-if="isSendingTest" class="spinner-border spinner-border-sm me-1"></span>
-                                            <i v-else class="bi bi-send me-1"></i>
-                                            Тест
-                                        </button>
-                                    </div>
-                                </div>
-                                <div v-if="testResult" class="mt-3 alert" :class="testResult.success ? 'alert-success' : 'alert-danger'">
-                                    <i class="bi" :class="testResult.success ? 'bi-check-circle' : 'bi-exclamation-triangle'"></i> {{ testResult.message }}
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Notification Toggles -->
-                    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 1rem;">
-                        <div class="card-header bg-white p-4 border-0">
-                            <h5 class="fw-bold mb-0"><i class="bi bi-toggle-on me-2 text-primary"></i>Управление уведомлениями</h5>
-                        </div>
-                        <div class="card-body p-4 pt-0">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold">Новая заявка</div>
-                                            <div class="small text-muted">Уведомление хелпдеску</div>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" v-model="settings.notify_on_create" @change="saveSettings">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold">Комментарий хелпера</div>
-                                            <div class="small text-muted">Уведомление автору</div>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" v-model="settings.notify_on_comment" @change="saveSettings">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold">Заявка выполнена</div>
-                                            <div class="small text-muted">Уведомление автору</div>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" v-model="settings.notify_on_complete" @change="saveSettings">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="p-4 bg-primary bg-opacity-10 rounded-3 border border-primary-subtle">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <div>
-                                                <div class="fw-bold">Просроченная заявка</div>
-                                                <div class="small text-muted">Email мониторинга:</div>
-                                            </div>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" v-model="settings.notify_on_overdue" @change="saveSettings">
-                                            </div>
-                                        </div>
-                                        <input type="email" v-model="settings.overdue_notification_email" class="form-control form-control-sm" placeholder="admin@korkyt.kz" @blur="saveSettings">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Email Templates -->
-                    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 1rem;">
-                        <div class="card-header bg-white p-4 border-0">
-                            <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-code me-2 text-primary"></i>Шаблоны писем</h5>
-                        </div>
-                        <div class="card-body p-4 pt-0">
-                            <div class="row">
-                                <div class="col-md-4 border-end">
-                                    <div class="list-group list-group-flush mb-4">
-                                        <button 
-                                            v-for="template in templates" :key="template.id"
-                                            class="list-group-item list-group-item-action border-0 mb-1 rounded-3 py-3"
-                                            :class="{ 'bg-primary text-white': selectedTemplateType === template.type }"
-                                            @click="selectedTemplateType = template.type"
-                                        >
-                                            <div class="fw-bold">{{ template.type_display }}</div>
-                                            <small :class="selectedTemplateType === template.type ? 'text-white-50' : 'text-muted'">{{ template.type }}</small>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div v-if="activeTemplate.id">
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-bold text-muted">Тема письма</label>
-                                            <input type="text" v-model="activeTemplate.subject" class="form-control shadow-none">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label small fw-bold text-muted">Текст письма (HTML)</label>
-                                            <textarea v-model="activeTemplate.body" class="form-control shadow-none" rows="10"></textarea>
-                                        </div>
-                                        
-                                        <div class="p-3 bg-light rounded-3 mb-4 small">
-                                            <div class="fw-bold mb-2">Доступные переменные:</div>
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <span class="badge bg-white text-primary border">\{\{ ticket_id \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ title \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ description \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ building \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ room \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ user_name \}\}</span>
-                                                <span class="badge bg-white text-primary border">\{\{ dashboard_link \}\}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="tplActive" v-model="activeTemplate.is_active">
-                                                <label class="form-check-label" for="tplActive">Шаблон активен</label>
-                                            </div>
-                                            <button @click="saveTemplate" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
-                                                Сохранить шаблон
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div v-else class="text-center py-5 text-muted">
-                                        Загрузка шаблонов...
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Email Logs -->
-                    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 1rem;">
-                        <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                            <h5 class="fw-bold mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>История уведомлений</h5>
-                            <div class="d-flex gap-2">
-                                <select v-model="logStatus" class="form-select form-select-sm rounded-pill px-3" @change="fetchLogs">
-                                    <option value="">Все статусы</option>
-                                    <option value="success">Успешно</option>
-                                    <option value="failed">Ошибка</option>
-                                </select>
-                                <input type="text" v-model="logSearch" class="form-control form-control-sm rounded-pill px-3" placeholder="Поиск по Email..." @input="fetchLogs">
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div v-if="isLoadingLogs" class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status"></div>
-                            </div>
-                            <div v-else class="table-responsive">
-                                <table class="table table-hover align-middle mb-0 small">
-                                    <thead class="bg-light">
-                                        <tr>
-                                            <th class="ps-4">Дата</th>
-                                            <th>Кому</th>
-                                            <th>Тип</th>
-                                            <th>Статус</th>
-                                            <th class="pe-4">Результат</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="log in logs" :key="log.id">
-                                            <td class="ps-4 text-nowrap text-muted">
-                                                {{ new Date(log.created_at).toLocaleString() }}
-                                            </td>
-                                            <td class="fw-bold">{{ log.to_email }}</td>
-                                            <td>{{ log.template_type }}</td>
-                                            <td>
-                                                <span :class="log.status === 'success' ? 'text-success' : 'text-danger'">
-                                                    <i class="bi" :class="log.status === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                                                    {{ log.status === 'success' ? ' Успешно' : ' Ошибка' }}
-                                                </span>
-                                            </td>
-                                            <td class="pe-4">
-                                                <div v-if="log.error_message" class="text-danger small" :title="log.error_message">
-                                                    {{ log.error_message.substring(0, 40) }}...
-                                                </div>
-                                                <span v-else class="text-muted">–</span>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -709,6 +366,7 @@ onMounted(() => {
 
 .btn-white:hover {
     background: #f8fafc;
+    border-color: #ccc;
 }
 
 .form-control:focus, .form-select:focus {

@@ -1,0 +1,16 @@
+INFO 2026-02-04 13:26:18,115 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 13:26:30,773 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 13:26:30,780 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-04 13:26:30,828 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 13:26:30,828 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-04 13:26:30,830 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 592
+INFO 2026-02-04 13:26:30,844 basehttp "GET /api/tickets/ HTTP/1.1" 200 8098
+INFO 2026-02-04 13:26:43,502 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 13:26:43,502 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 13:26:55,738 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 13:26:55,743 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 13:26:55,768 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 13:26:55,771 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 13:26:55,787 basehttp "GET /api/tickets/ HTTP/1.1" 200 8098
+INFO 2026-02-04 13:27:21,307 basehttp "POST /api/tickets/ HTTP/1.1" 201 458
+INFO 2026-02-04 13:27:21,351 basehttp "GET /api/tickets/ HTTP/1.1" 200 8557

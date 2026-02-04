@@ -4,22 +4,13 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
-from django.core.mail import send_mail
-from tickets.services.email_service import EmailService
 from django.conf import settings
-from .models import Ticket, User, Corpus, Feedback, SystemSetting, EmailTemplate, EmailLog
-from .serializers import (
-    TicketSerializer, UserSerializer, CorpusSerializer, 
-    FeedbackSerializer, SystemSettingSerializer,
-    EmailTemplateSerializer, EmailLogSerializer
-)
+from .models import Ticket, User, Corpus, Feedback, SystemSetting
+from .serializers import TicketSerializer, UserSerializer, CorpusSerializer, FeedbackSerializer, SystemSettingSerializer
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
-import logging
 import datetime
 import pytz
-
-logger = logging.getLogger('email_forwarding')
 
 class IsTeacher(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -105,23 +96,6 @@ class TicketViewSet(viewsets.ModelViewSet):
                  })
 
         ticket = serializer.save(author=self.request.user)
-        
-        # Send email logic via Service
-        context = {
-            'ticket_id': ticket.id,
-            'title': ticket.title,
-            'description': ticket.description,
-            'building': ticket.building,
-            'room': ticket.room,
-            'user_name': ticket.author.username,
-            'dashboard_link': 'http://localhost:5173/helpdesk'
-        }
-        
-        helpdesk_users = User.objects.filter(role='helpdesk')
-        recipient_list = [u.email for u in helpdesk_users if u.email]
-        
-        if recipient_list:
-            EmailService.send_notification('new_ticket', context, recipient_list)
 
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def take(self, request, pk=None):
@@ -151,14 +125,10 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.save()
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
-
-
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def add_comment(self, request, pk=None):
         ticket = self.get_object()
         
-
-
         comment = request.data.get('comment')
         
         if not comment:
@@ -170,18 +140,6 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.deadline = timezone.now() + datetime.timedelta(days=7)
         ticket.is_overdue = False # Reset overdue if extended
         ticket.save()
-
-        # Send Email Notification via Service
-        if ticket.author.email:
-            helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-            context = {
-                'ticket_id': ticket.id,
-                'title': ticket.title,
-                'comment': comment,
-                'helper_name': helper_name,
-                'dashboard_link': 'http://localhost:5173/helpdesk'
-            }
-            EmailService.send_notification('comment_added', context, [ticket.author.email])
         
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
@@ -199,22 +157,8 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.completed_at = timezone.now() # Technically finished work, waiting approve
         ticket.save()
 
-        # Send Email Notification via Service
-        if ticket.author.email:
-            resolution = ticket.report_comment or 'Комментарий отсутствует'
-            helper_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username
-            context = {
-                'ticket_id': ticket.id,
-                'title': ticket.title,
-                'resolution': resolution,
-                'helper_name': helper_name,
-                'dashboard_link': 'http://localhost:5173/helpdesk'
-            }
-            EmailService.send_notification('ticket_completed', context, [ticket.author.email])
-
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
     def approve(self, request, pk=None):
         ticket = self.get_object()
@@ -297,8 +241,6 @@ class TicketViewSet(viewsets.ModelViewSet):
             'overdue_count': overdue_count
         })
 
-
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -314,8 +256,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-    
-
 
 class FeedbackViewSet(viewsets.ModelViewSet):
     queryset = Feedback.objects.all()
@@ -339,54 +279,3 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         settings = SystemSetting.get_settings()
         serializer = self.get_serializer(settings)
         return Response(serializer.data)
-
-    @action(detail=False, methods=['post'], permission_classes=[IsAdmin])
-    def send_test_email(self, request):
-        to_email = request.data.get('to_email')
-        if not to_email:
-            return Response({'error': 'Email получателя обязателен'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Test context
-        context = {
-            'ticket_id': 'TEST-123',
-            'title': 'Тестовая заявка',
-            'description': 'Это тестовое уведомление для проверки настроек SMTP.',
-            'building': 'Главный корпус',
-            'room': '101',
-            'user_name': request.user.username,
-            'dashboard_link': 'http://localhost:5173',
-            'helper_name': 'Система',
-            'comment': 'Тестовый комментарий',
-            'resolution': 'Проблема успешно решена (тест)'
-        }
-        
-        # We try to send a 'new_ticket' template as a test
-        # Note: In a real scenario, we might want to use EmailService.process_send directly
-        # but here we use the task entry point to verify the whole chain if task is async
-        # Let's use process_send directly to give immediate feedback in the UI for the TEST button
-        success = EmailService.process_send('new_ticket', context, [to_email])
-        
-        if success:
-            return Response({'message': f'Тестовое письмо успешно отправлено на {to_email}'})
-        else:
-            return Response({'error': 'Ошибка при отправке письма. Проверьте логи писем и настройки SMTP.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class EmailTemplateViewSet(viewsets.ModelViewSet):
-    queryset = EmailTemplate.objects.all()
-    serializer_class = EmailTemplateSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdmin]
-
-class EmailLogViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = EmailLog.objects.all()
-    serializer_class = EmailLogSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdmin]
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        to_email = self.request.query_params.get('to_email')
-        if to_email:
-            queryset = queryset.filter(to_email__icontains=to_email)
-        status_filter = self.request.query_params.get('status')
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-        return queryset
