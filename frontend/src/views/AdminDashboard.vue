@@ -176,7 +176,8 @@ const getStatusLabel = (status) => {
         'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима'
+        'UNFIXABLE': 'Неисправима',
+        'CANCELED': 'Отменена'
     }
     return map[status] || status
 }
@@ -189,6 +190,7 @@ const getStatusColor = (status) => {
         case 'WAITING_APPROVE': return 'bg-primary';
         case 'CLOSED': return 'bg-secondary';
         case 'UNFIXABLE': return 'bg-danger';
+        case 'CANCELED': return 'bg-dark';
         default: return 'bg-light text-dark';
     }
 }
@@ -351,6 +353,7 @@ onMounted(() => {
                                 <option value="WAITING_APPROVE">Ожидает</option>
                                 <option value="CLOSED">Закрыта</option>
                                 <option value="UNFIXABLE">Неисправима</option>
+                                <option value="CANCELED">Отменена</option>
                             </select>
                         </div>
                         <div class="col-md-3">

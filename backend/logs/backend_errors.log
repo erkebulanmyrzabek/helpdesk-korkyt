@@ -320,3 +320,122 @@ INFO 2026-02-04 16:27:13,069 basehttp "GET /api/settings/current/ HTTP/1.1" 200 
 INFO 2026-02-04 16:27:13,072 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
 INFO 2026-02-04 16:27:13,083 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
 INFO 2026-02-04 16:27:13,101 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:40:44,869 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:40:44,870 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:40:44,896 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:43:17,043 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/models.py changed, reloading.
+INFO 2026-02-04 16:43:17,385 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 16:44:02,780 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-04 16:44:03,078 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 16:45:07,449 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:45:07,451 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:45:07,455 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:45:07,459 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:45:07,462 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:45:07,465 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:45:07,476 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:45:07,498 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:45:07,517 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:49:25,600 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:49:25,601 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:49:25,611 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:49:25,612 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:49:25,631 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 16:49:25,633 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 16:49:25,642 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:49:25,665 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 16:49:25,682 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:05:59,421 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:05:59,426 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:05:59,431 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:05:59,434 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:05:59,438 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:05:59,441 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:05:59,451 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:05:59,474 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:05:59,499 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:05:59,705 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-04 17:06:00,123 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 17:08:39,886 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/models.py changed, reloading.
+INFO 2026-02-04 17:08:40,227 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 17:08:47,704 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-04 17:08:47,986 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 17:09:10,101 basehttp "OPTIONS /api/settings/current/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,102 basehttp "OPTIONS /api/settings/current/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,103 basehttp "OPTIONS /api/corpuses/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,103 basehttp "OPTIONS /api/corpuses/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,103 basehttp "OPTIONS /api/corpuses/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,104 basehttp "OPTIONS /api/settings/current/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:09:10,116 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:09:10,119 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:09:10,124 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:09:10,128 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:09:10,134 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:09:10,137 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:09:10,150 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:09:10,170 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:09:10,191 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:09:48,087 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-04 17:09:48,399 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 17:10:30,402 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:10:30,407 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:10:30,411 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:10:30,416 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:10:30,432 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:10:30,464 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:12:21,241 autoreload Watching for file changes with StatReloader
+INFO 2026-02-04 17:12:44,520 basehttp "OPTIONS /api/api-token-auth/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:12:44,749 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 17:12:44,757 basehttp "OPTIONS /api/users/me/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:12:44,760 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 17:12:44,812 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:12:44,815 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:12:44,833 basehttp "GET /api/tickets/ HTTP/1.1" 200 11271
+INFO 2026-02-04 17:13:03,518 basehttp "POST /api/tickets/ HTTP/1.1" 201 522
+INFO 2026-02-04 17:13:03,557 basehttp "GET /api/tickets/ HTTP/1.1" 200 11794
+INFO 2026-02-04 17:13:13,525 basehttp "OPTIONS /api/tickets/16/cancel/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:13:13,539 basehttp "POST /api/tickets/16/cancel/ HTTP/1.1" 200 527
+INFO 2026-02-04 17:13:13,586 basehttp "GET /api/tickets/ HTTP/1.1" 200 11799
+INFO 2026-02-04 17:13:22,450 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-04 17:13:22,458 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-04 17:13:22,504 basehttp "GET /api/tickets/ HTTP/1.1" 200 11799
+INFO 2026-02-04 17:13:31,358 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 17:13:31,368 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 17:13:31,397 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:13:31,400 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:13:31,414 basehttp "GET /api/tickets/ HTTP/1.1" 200 11799
+INFO 2026-02-04 17:13:41,883 basehttp "POST /api/tickets/ HTTP/1.1" 201 466
+INFO 2026-02-04 17:13:41,930 basehttp "GET /api/tickets/ HTTP/1.1" 200 12266
+INFO 2026-02-04 17:13:46,152 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-04 17:13:46,161 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-04 17:13:46,204 basehttp "GET /api/tickets/ HTTP/1.1" 200 12266
+INFO 2026-02-04 17:13:47,284 basehttp "OPTIONS /api/tickets/17/take/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:13:47,347 basehttp "POST /api/tickets/17/take/ HTTP/1.1" 200 588
+INFO 2026-02-04 17:13:47,372 basehttp "GET /api/tickets/ HTTP/1.1" 200 12388
+INFO 2026-02-04 17:13:53,747 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-04 17:13:53,754 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-04 17:13:53,787 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-04 17:13:53,788 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:13:53,803 basehttp "GET /api/tickets/ HTTP/1.1" 200 12388
+INFO 2026-02-04 17:13:57,938 basehttp "OPTIONS /api/tickets/17/cancel/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:13:57,950 basehttp "POST /api/tickets/17/cancel/ HTTP/1.1" 200 585
+INFO 2026-02-04 17:13:57,984 basehttp "GET /api/tickets/ HTTP/1.1" 200 12385
+INFO 2026-02-04 17:14:03,562 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-04 17:14:03,570 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-04 17:14:03,612 basehttp "GET /api/tickets/ HTTP/1.1" 200 12385
+INFO 2026-02-04 17:14:13,838 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 17:14:13,845 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-04 17:14:13,887 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:14:13,887 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-04 17:14:13,887 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-04 17:14:13,902 basehttp "GET /api/tickets/ HTTP/1.1" 200 12385
+INFO 2026-02-04 17:14:35,027 basehttp "OPTIONS /api/tickets/12/mark_unfixable/ HTTP/1.1" 200 0
+INFO 2026-02-04 17:14:35,045 basehttp "POST /api/tickets/12/mark_unfixable/ HTTP/1.1" 200 661
+INFO 2026-02-04 17:14:35,065 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-04 17:14:35,090 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-04 17:17:32,817 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-04 17:17:32,830 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-04 17:17:32,920 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-04 17:17:32,924 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-04 17:17:32,931 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-04 17:17:32,944 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379

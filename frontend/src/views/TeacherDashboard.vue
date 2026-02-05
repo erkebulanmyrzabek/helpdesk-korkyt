@@ -144,6 +144,16 @@ const submitRating = async () => {
     }
 }
 
+const cancelTicket = async (id) => {
+    if (!confirm('Вы уверены, что хотите отменить заявку?')) return
+    try {
+        await axios.post(`tickets/${id}/cancel/`)
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при отмене заявки')
+    }
+}
+
 const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
@@ -152,6 +162,7 @@ const getStatusBadgeClass = (status) => {
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
         case 'UNFIXABLE': return 'badge bg-danger';
+        case 'CANCELED': return 'badge bg-dark';
         default: return 'badge bg-light text-dark';
     }
 }
@@ -163,7 +174,8 @@ const getStatusText = (status) => {
         'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима'
+        'UNFIXABLE': 'Неисправима',
+        'CANCELED': 'Отменена'
     }
     return map[status] || status
 }
@@ -327,14 +339,24 @@ onUnmounted(() => {
                          </a>
                     </div>
                     
-                    <div v-if="ticket.assigned_to_username" class="alert alert-light border-0 bg-light p-2 d-inline-block mb-2">
+                    <div v-if="ticket.assigned_to_username" class="alert alert-light border-0 bg-light p-2 d-inline-block mb-0">
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
                     </div>
 
+                    <!-- NEW: Cancel Button -->
+                    <div v-if="['NEW', 'IN_PROGRESS', 'WAITING_FOR_PARTS'].includes(ticket.status)" class="mt-2">
+                        <button class="btn btn-sm btn-outline-danger" @click="cancelTicket(ticket.id)">
+                            <i class="bi bi-x-circle me-1"></i>Отменить заявку
+                        </button>
+                    </div>
+
                     <!-- NEW: Closed & Feedback Logic -->
-                    <div v-if="ticket.status === 'CLOSED'" class="mt-3">
-                        <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10 mb-2">
-                            <h6 class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
+                    <div v-if="['CLOSED', 'UNFIXABLE'].includes(ticket.status)" class="mt-3">
+                        <div :class="ticket.status === 'CLOSED' ? 'bg-success bg-opacity-10 border-success' : 'bg-danger bg-opacity-10 border-danger'" class="p-3 rounded border border-opacity-10 mb-2">
+                            <h6 :class="ticket.status === 'CLOSED' ? 'text-success' : 'text-danger'" class="fw-bold mb-1">
+                                <i :class="ticket.status === 'CLOSED' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'" class="bi me-2"></i>
+                                {{ ticket.status === 'CLOSED' ? 'Заявка закрыта' : 'Заявка неисправима' }}
+                            </h6>
                             <small class="text-muted" v-if="ticket.completed_at">
                                 Завершена: {{ formatDate(ticket.completed_at) }}
                             </small>
@@ -352,24 +374,33 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <!-- Feedback Section -->
-                        <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
-                             <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
-                             <div class="d-flex align-items-center mb-1">
-                                 <span class="text-warning me-2 fs-5">
-                                     {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
-                                 </span>
-                                 <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
-                             </div>
-                             <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
-                                 "{{ ticket.feedback.comment }}"
-                             </p>
-                        </div>
-                        <div v-else class="text-center">
-                            <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
-                                <i class="bi bi-star me-2"></i>Оценить работу
-                            </button>
-                        </div>
+                        <!-- Feedback Section (Only for CLOSED) -->
+                        <template v-if="ticket.status === 'CLOSED'">
+                            <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
+                                 <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
+                                 <div class="d-flex align-items-center mb-1">
+                                     <span class="text-warning me-2 fs-5">
+                                         {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
+                                     </span>
+                                     <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
+                                 </div>
+                                 <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
+                                     "{{ ticket.feedback.comment }}"
+                                 </p>
+                            </div>
+                            <div v-else class="text-center">
+                                <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
+                                    <i class="bi bi-star me-2"></i>Оценить работу
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- NEW: Canceled Section -->
+                    <div v-if="ticket.status === 'CANCELED'" class="mt-3">
+                         <div class="p-3 bg-dark bg-opacity-10 rounded border border-dark border-opacity-10 mb-2">
+                            <h6 class="text-dark fw-bold mb-1"><i class="bi bi-x-circle me-2"></i>Заявка отменена</h6>
+                         </div>
                     </div>
                 </div>
             </div>

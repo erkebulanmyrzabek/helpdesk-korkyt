@@ -32,8 +32,34 @@ const myTickets = computed(() => {
 })
 const completedTickets = computed(() => {
     if (!authStore.user) return []
-    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED')
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && (t.status === 'CLOSED' || t.status === 'UNFIXABLE' || t.status === 'CANCELED'))
 })
+
+const getStatusText = (status) => {
+    const map = {
+        'NEW': 'Новая',
+        'IN_PROGRESS': 'В работе',
+        'WAITING_FOR_PARTS': 'Ожидается запчасть',
+        'WAITING_APPROVE': 'Ожидает подтверждения',
+        'CLOSED': 'Закрыта',
+        'UNFIXABLE': 'Неисправима',
+        'CANCELED': 'Отменена'
+    }
+    return map[status] || status
+}
+
+const getStatusBadgeClass = (status) => {
+    switch(status) {
+        case 'NEW': return 'badge bg-success';
+        case 'IN_PROGRESS': return 'badge bg-warning text-dark';
+        case 'WAITING_FOR_PARTS': return 'badge bg-info text-dark';
+        case 'WAITING_APPROVE': return 'badge bg-primary';
+        case 'CLOSED': return 'badge bg-secondary';
+        case 'UNFIXABLE': return 'badge bg-danger';
+        case 'CANCELED': return 'badge bg-dark';
+        default: return 'badge bg-light text-dark';
+    }
+}
 
 const needPartsData = ref({
     id: null,
@@ -154,8 +180,7 @@ onMounted(() => {
                             <h6 class="fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <div class="small text-muted mb-2">
                                 {{ ticket.building }}, {{ ticket.room }} 
-                                <span v-if="ticket.status === 'WAITING_FOR_PARTS'" class="badge bg-info text-dark">Ожидается запчасть</span>
-                                <span v-else>({{ ticket.status }})</span>
+                                <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
                             </div>
                             
 
@@ -202,7 +227,7 @@ onMounted(() => {
                     <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="text-muted text-decoration-line-through">#{{ ticket.id }} {{ ticket.title }}</h6>
-                            <span class="badge bg-success mb-2">Закрыто</span>
+                            <span :class="getStatusBadgeClass(ticket.status) + ' mb-2'">{{ getStatusText(ticket.status) }}</span>
                             
                             <div v-if="ticket.feedback" class="p-2 rounded" style="background-color: #e9ecef;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">

@@ -34,6 +34,7 @@ class Ticket(models.Model):
         ('WAITING_FOR_PARTS', 'Ожидается запчасть'),
         ('CLOSED', 'Закрыта'),
         ('UNFIXABLE', 'Неисправима'),
+        ('CANCELED', 'Отменена'),
     )
 
     title = models.CharField("Заголовок", max_length=200)

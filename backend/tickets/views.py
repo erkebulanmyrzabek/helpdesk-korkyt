@@ -167,28 +167,34 @@ class TicketViewSet(viewsets.ModelViewSet):
         if 'media_after' in request.FILES:
             ticket.media_after = request.FILES['media_after']
             
-        comment = request.data.get('comment')
+        report_comment = request.data.get('report_comment')
         # Comment is optional now. If present, set it as report_comment.
         # Logic: Show ONLY the comment entered here.
-        if comment:
-            ticket.report_comment = comment
-        elif 'report_comment' in request.data: # Allow clearing it explicitly if passed as empty string
-             ticket.report_comment = ''
+        if report_comment is not None:
+            ticket.report_comment = report_comment
         
-        # Note: If comment is not provided, we don't necessarily clear it unless we want to "reset" it.
-        # But requirement says "After closing user sees ONLY comment from Finish".
-        # So if I send empty comment, I should probably store empty comment.
-        # Let's assume if it is sent, we take it.
-        
-        # Wait, if I submitted parts_wait_reason before, report_comment might be empty or old.
-        # The prompt says: "If at closing comment is not entered -> show nothing".
-        # So I should probably set report_comment to the comment (even if empty).
-        ticket.report_comment = comment if comment else None
-
         ticket.status = 'CLOSED'
         ticket.completed_at = timezone.now()
         ticket.save()
 
+        return Response(TicketSerializer(ticket, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
+    def cancel(self, request, pk=None):
+        ticket = self.get_object()
+        
+        if ticket.author != request.user:
+            return Response({'error': 'Вы не автор этой заявки'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if ticket.status in ['CLOSED', 'UNFIXABLE']:
+            return Response({'error': 'Нельзя отменить завершенную заявку'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if ticket.status == 'CANCELED':
+            return Response({'error': 'Заявка уже отменена'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        ticket.status = 'CANCELED'
+        ticket.save()
+        
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
