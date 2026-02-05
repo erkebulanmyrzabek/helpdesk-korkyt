@@ -16,6 +16,7 @@ const fileInputMedia = ref(null)
 const mediaPreview = ref(null)
 const isDragging = ref(false)
 const isSubmitting = ref(false)
+const sysSettings = ref(null)
 
 const fetchTickets = async () => {
     const response = await axios.get('tickets/')
@@ -25,6 +26,15 @@ const fetchTickets = async () => {
 const fetchCorpuses = async () => {
     const response = await axios.get('corpuses/')
     corpuses.value = response.data
+}
+
+const fetchSysSettings = async () => {
+    try {
+        const response = await axios.get('settings/current/')
+        sysSettings.value = response.data
+    } catch (error) {
+        console.error('Failed to fetch system settings:', error)
+    }
 }
 
 const setFile = (file) => {
@@ -79,10 +89,6 @@ const removeMedia = () => {
 
 const createTicket = async () => {
     if (isSubmitting.value) return;
-    if (!newTicket.value.media_before) {
-        alert('Пожалуйста, прикрепите фото или видео проблемы.')
-        return
-    }
     isSubmitting.value = true;
 
     const formData = new FormData()
@@ -127,9 +133,9 @@ const closeRatingModal = () => {
 
 const submitRating = async () => {
     try {
-        await axios.post(`tickets/${ratingData.value.ticketId}/approve/`, {
+        await axios.post(`tickets/${ratingData.value.ticketId}/leave_feedback/`, {
             rating: ratingData.value.rating,
-            feedback: ratingData.value.feedback
+            comment: ratingData.value.feedback
         })
         closeRatingModal()
         fetchTickets()
@@ -141,7 +147,6 @@ const submitRating = async () => {
 const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
-        case 'TRANSIT': return 'badge bg-info text-dark';
         case 'IN_PROGRESS': return 'badge bg-warning text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
@@ -153,7 +158,6 @@ const getStatusBadgeClass = (status) => {
 const getStatusText = (status) => {
     const map = {
         'NEW': 'Новая',
-        'TRANSIT': 'В пути',
         'IN_PROGRESS': 'В работе',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
@@ -177,13 +181,38 @@ const cleanComment = (comment) => {
     return comment.replace(/\[.*?\] .*?: /g, '').trim()
 }
 
+const isWorkingHours = computed(() => {
+    if (!sysSettings.value) return true
+    if (sysSettings.value.allow_outside_working_hours) return true
+    
+    const now = new Date()
+    const almatyTime = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Almaty',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+    }).format(now)
+    
+    const [h, m] = almatyTime.split(':').map(Number)
+    const currentMinutes = h * 60 + m
+    
+    const [startH, startM] = sysSettings.value.work_start_time.split(':').map(Number)
+    const startMinutes = startH * 60 + startM
+    
+    const [endH, endM] = sysSettings.value.work_end_time.split(':').map(Number)
+    const endMinutes = endH * 60 + endM
+    
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes
+})
+
 const isSubmitDisabled = computed(() => {
-    return isSubmitting.value || !newTicket.value.media_before
+    return isSubmitting.value || !isWorkingHours.value
 })
 
 onMounted(() => {
     fetchTickets()
     fetchCorpuses()
+    fetchSysSettings()
 })
 
 onUnmounted(() => {
@@ -200,6 +229,11 @@ onUnmounted(() => {
                     <Clock />
                 </div>
                 <div class="card-body">
+                    <div v-if="!isWorkingHours" class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Заявки принимаются только в рабочее время: 
+                        <strong>{{ sysSettings?.work_start_time.substring(0, 5) }} — {{ sysSettings?.work_end_time.substring(0, 5) }}</strong>
+                    </div>
                     <form @submit.prevent="createTicket">
                         <div class="mb-3">
                             <label class="form-label text-muted">Заголовок</label>
@@ -224,11 +258,11 @@ onUnmounted(() => {
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео) <span class="text-danger">*</span></label>
+                            <label class="form-label text-muted"><i class="bi bi-paperclip me-1"></i>Медиа (Фото/Видео) <span class="text-secondary opacity-50 small">(по желанию)</span></label>
                             
                             <div 
                                 class="upload-zone mb-2"
-                                :class="{ 'is-dragging': isDragging, 'border-danger': !newTicket.media_before && !isDragging }"
+                                :class="{ 'is-dragging': isDragging }"
                                 @dragover.prevent="isDragging = true"
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
@@ -237,7 +271,7 @@ onUnmounted(() => {
                                 <div v-if="!mediaPreview" class="text-center py-4 text-muted">
                                     <i class="bi bi-cloud-upload display-6 mb-2 d-block"></i>
                                     <span class="small">Нажмите или перетащите файл сюда</span>
-                                    <div class="text-danger small mt-1" v-if="!newTicket.media_before">* Обязательно</div>
+                                    <div class="text-muted small mt-1">Фото можно загрузить по желанию</div>
                                 </div>
                                 <div v-else class="position-relative h-100 d-flex justify-content-center align-items-center bg-light rounded">
                                     <span class="text-success fw-bold">Файл выбран</span>
@@ -292,38 +326,45 @@ onUnmounted(() => {
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
                     </div>
 
-                     <div v-if="ticket.status === 'WAITING_APPROVE'" class="mt-3 card border-warning mb-3">
-                        <div class="card-header bg-warning text-dark fw-bold">
-                            <i class="bi bi-flag-fill me-2"></i>🏁 Работа выполнена
-                        </div>
-                        <div class="card-body bg-warning bg-opacity-10">
-                            <div class="mb-2">
-                                <strong>Исполнитель:</strong> {{ ticket.assigned_to_username }}
-                            </div>
-                            <div class="mb-2">
-                                <strong>Время завершения:</strong> {{ formatDate(ticket.completed_at) }}
-                            </div>
-                            
-                            <div v-if="ticket.report_comment" class="mb-3 p-2 bg-white rounded border">
+                    <!-- NEW: Closed & Feedback Logic -->
+                    <div v-if="ticket.status === 'CLOSED'" class="mt-3">
+                        <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10 mb-2">
+                            <h6 class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
+                            <small class="text-muted" v-if="ticket.completed_at">
+                                Завершена: {{ formatDate(ticket.completed_at) }}
+                            </small>
+                             <!-- Report Comment Display -->
+                            <div v-if="ticket.report_comment" class="mt-2 p-2 bg-white rounded border">
                                 <small class="text-muted d-block mb-1">Комментарий исполнителя:</small>
                                 {{ cleanComment(ticket.report_comment) }}
                             </div>
-
-                            <div v-if="ticket.media_after" class="mb-3">
+                            <!-- Result Photo -->
+                             <div v-if="ticket.media_after" class="mt-2">
                                 <small class="text-muted d-block mb-1">Фото результата:</small>
                                 <a :href="ticket.media_after" target="_blank" class="d-inline-block border rounded overflow-hidden">
                                     <img :src="ticket.media_after" alt="Результат" style="height: 100px; object-fit: cover;">
                                 </a>
                             </div>
+                        </div>
 
-                            <button class="btn btn-success w-100 btn-lg shadow-sm" @click="confirmTicket(ticket.id)">
-                                <i class="bi bi-check-circle-fill me-2"></i>Подтвердить выполнение
+                        <!-- Feedback Section -->
+                        <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
+                             <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
+                             <div class="d-flex align-items-center mb-1">
+                                 <span class="text-warning me-2 fs-5">
+                                     {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
+                                 </span>
+                                 <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
+                             </div>
+                             <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
+                                 "{{ ticket.feedback.comment }}"
+                             </p>
+                        </div>
+                        <div v-else class="text-center">
+                            <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
+                                <i class="bi bi-star me-2"></i>Оценить работу
                             </button>
                         </div>
-                    </div>
-
-                     <div v-if="ticket.status === 'CLOSED'" class="mt-3 p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10">
-                        <h6 class="text-success fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
                     </div>
                 </div>
             </div>

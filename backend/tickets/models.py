@@ -5,16 +5,13 @@ import os
 
 class Corpus(models.Model):
     name = models.CharField("Название корпуса", max_length=100, unique=True)
-    number = models.IntegerField("Номер корпуса", null=True, blank=True, unique=True)
     
     class Meta:
         verbose_name = "Корпус"
         verbose_name_plural = "Корпуса"
-        ordering = ['number', 'name']
+        ordering = ['id']
     
     def __str__(self):
-        if self.number:
-            return f"Корпус {self.number} ({self.name})"
         return self.name
 
 class User(AbstractUser):
@@ -24,13 +21,7 @@ class User(AbstractUser):
         ('admin', 'Админ'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='teacher')
-    corpus = models.ForeignKey(Corpus, on_delete=models.SET_NULL, null=True, blank=True, 
-                               related_name='helpdesk_users', verbose_name="Корпус",
-                               help_text="Корпус для хелпдеска (оставьте пустым для учителей и админов)")
-    
-    # New fields
     plain_password = models.CharField("Пароль (raw)", max_length=255, null=True, blank=True)
-    is_checked_in = models.BooleanField("На смене", default=False)
     rating = models.FloatField("Рейтинг", default=0.0)
 
     def __str__(self):
@@ -39,9 +30,7 @@ class User(AbstractUser):
 class Ticket(models.Model):
     STATUS_CHOICES = (
         ('NEW', 'Новая'),
-        ('TRANSIT', 'В пути'),
         ('IN_PROGRESS', 'В работе'),
-        ('WAITING_APPROVE', 'Ожидает подтверждения'),
         ('CLOSED', 'Закрыта'),
         ('UNFIXABLE', 'Неисправима'),
     )
@@ -98,3 +87,21 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Отзыв к заявке #{self.ticket.id} - {self.rating}"
+
+class SystemSetting(models.Model):
+    # Working Hours
+    work_start_time = models.TimeField("Начало работы", default="09:00")
+    work_end_time = models.TimeField("Конец работы", default="18:00")
+    allow_outside_working_hours = models.BooleanField("Разрешить заявки вне рабочего времени", default=False)
+
+    class Meta:
+        verbose_name = "Настройка системы"
+        verbose_name_plural = "Настройки системы"
+
+    @classmethod
+    def get_settings(cls):
+        obj, created = cls.objects.get_or_create(id=1)
+        return obj
+
+    def __str__(self):
+        return "Настройки системы"

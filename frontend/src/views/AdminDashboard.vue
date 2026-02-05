@@ -10,21 +10,19 @@ const stats = ref({
     teacher_stats: [],
     category_stats: {},
     avg_completion_time_minutes: null,
-    active_helpers: 0,
+
     total_helpers: 0,
     overdue_count: 0
 })
 const tickets = ref([])
 const users = ref([])
-const corpuses = ref([])
 const newUser = ref({
     username: '',
     email: '',
     password: '',
     first_name: '',
     last_name: '',
-    role: 'teacher',
-    corpus_id: null
+    role: 'teacher'
 })
 const extendDeadlineData = ref({
     ticketId: null,
@@ -38,8 +36,11 @@ const filters = ref({
     date: '',
     status: '',
     author: '',
-    helper: ''
+    helper: '',
+    building: ''
 })
+
+const corpuses = ref([])
 
 const filteredTickets = computed(() => {
     return tickets.value.filter(ticket => {
@@ -63,6 +64,9 @@ const filteredTickets = computed(() => {
             const helper = ticket.assigned_to_username || ''
             if (!helper.toLowerCase().includes(filters.value.helper.toLowerCase())) return false
         }
+
+        // Filter by Building
+        if (filters.value.building && ticket.building !== filters.value.building) return false
 
         return true
     })
@@ -114,16 +118,14 @@ const fetchCorpuses = async () => {
     }
 }
 
+
+
 const createUser = async () => {
     if (isCreatingUser.value) return;
     isCreatingUser.value = true;
     try {
-        const userData = { ...newUser.value }
-        if (userData.role !== 'helpdesk') {
-            delete userData.corpus_id
-        }
-        await axios.post('users/', userData)
-        newUser.value = { username: '', email: '', password: '', first_name: '', last_name: '', role: 'teacher', corpus_id: null }
+        await axios.post('users/', newUser.value)
+        newUser.value = { username: '', email: '', password: '', first_name: '', last_name: '', role: 'teacher' }
         fetchUsers()
         alert('Пользователь создан')
     } catch (error) {
@@ -170,7 +172,6 @@ const extendDeadline = async () => {
 const getStatusLabel = (status) => {
     const map = {
         'NEW': 'Новая',
-        'TRANSIT': 'В пути',
         'IN_PROGRESS': 'В работе',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
@@ -182,7 +183,6 @@ const getStatusLabel = (status) => {
 const getStatusColor = (status) => {
     switch(status) {
         case 'NEW': return 'bg-success';
-        case 'TRANSIT': return 'bg-info text-dark';
         case 'IN_PROGRESS': return 'bg-warning text-dark';
         case 'WAITING_APPROVE': return 'bg-primary';
         case 'CLOSED': return 'bg-secondary';
@@ -208,20 +208,7 @@ const formatTime = (minutes) => {
     return `${hours}ч ${mins}мин`
 }
 
-const exportStats = async () => {
-    isExporting.value = true
-    try {
-        await axios.post('tickets/export_statistics/')
-        alert('Файл отправлен на вашу почту')
-    } catch (error) {
-        alert(error.response?.data?.error || 'Ошибка экспорта')
-    } finally {
-        // Keep disabled for 10 seconds
-        setTimeout(() => {
-            isExporting.value = false
-        }, 10000)
-    }
-}
+
 
 onMounted(() => {
     fetchStats()
@@ -248,11 +235,9 @@ onMounted(() => {
                 <router-link to="/admin/reviews" class="btn btn-outline-primary">
                     <i class="bi bi-star me-1"></i>Отзывы
                 </router-link>
-                <button class="btn btn-success" @click="exportStats" :disabled="isExporting">
-                    <span v-if="isExporting" class="spinner-border spinner-border-sm me-2"></span>
-                    <i v-else class="bi bi-file-earmark-excel me-2"></i>
-                    Выгрузка (Excel)
-                </button>
+                <router-link to="/admin/settings" class="btn btn-outline-primary">
+                    <i class="bi bi-gear me-1"></i>Настройки
+                </router-link>
             </div>
         </div>
         
@@ -260,7 +245,7 @@ onMounted(() => {
         <div v-if="activeTab === 'stats'">
             <!-- Main Stats Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card bg-gradient-primary text-white h-100 shadow-sm" style="background: linear-gradient(45deg, #002855, #00509d);">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
                             <h1 class="display-4 fw-bold mb-0">{{ stats.total }}</h1>
@@ -268,17 +253,8 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-md-4">
-                    <div class="card bg-success text-white h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
-                            <h1 class="display-4 fw-bold mb-0">{{ stats.active_helpers }} / {{ stats.total_helpers }}</h1>
-                            <p class="mb-0 opacity-75">Хелперы на смене</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card bg-danger text-white h-100 shadow-sm">
                         <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-4">
                             <h1 class="display-4 fw-bold mb-0">{{ stats.overdue_count }}</h1>
@@ -368,7 +344,6 @@ onMounted(() => {
                             <select v-model="filters.status" class="form-select form-select-sm">
                                 <option value="">Все статусы</option>
                                 <option value="NEW">Новая</option>
-                                <option value="TRANSIT">В пути</option>
                                 <option value="IN_PROGRESS">В работе</option>
                                 <option value="WAITING_APPROVE">Ожидает</option>
                                 <option value="CLOSED">Закрыта</option>
@@ -378,8 +353,14 @@ onMounted(() => {
                         <div class="col-md-3">
                             <input type="text" v-model="filters.author" class="form-control form-control-sm" placeholder="Автор...">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <input type="text" v-model="filters.helper" class="form-control form-control-sm" placeholder="Исполнитель...">
+                        </div>
+                        <div class="col-md-2">
+                            <select v-model="filters.building" class="form-select form-select-sm">
+                                <option value="">Все здания</option>
+                                <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.name">{{ corpus.name }}</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -492,13 +473,6 @@ onMounted(() => {
                                         <option value="admin">Администратор</option>
                                     </select>
                                 </div>
-                                <div class="mb-3" v-if="newUser.role === 'helpdesk'">
-                                    <label class="form-label small text-muted">Корпус</label>
-                                    <select v-model="newUser.corpus_id" class="form-select">
-                                        <option :value="null">Выберите корпус</option>
-                                        <option v-for="corpus in corpuses" :key="corpus.id" :value="corpus.id">{{ corpus.name }}</option>
-                                    </select>
-                                </div>
                                 <button type="submit" class="btn btn-primary w-100" :disabled="isCreatingUser">
                                     <span v-if="isCreatingUser">
                                         <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -522,7 +496,6 @@ onMounted(() => {
                                         <th>Логин</th>
                                         <th>Имя</th>
                                         <th>Роль</th>
-                                        <th>Корпус</th>
                                         <th>Пароль</th>
                                         <th>Действия</th>
                                     </tr>
@@ -535,10 +508,6 @@ onMounted(() => {
                                             <span class="badge bg-light text-dark border">
                                                 {{ getRoleLabel(user.role) }}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span v-if="user.corpus_name" class="badge bg-info text-white">{{ user.corpus_name }}</span>
-                                            <span v-else class="text-muted">-</span>
                                         </td>
                                         <td>
                                             <div v-if="user.plain_password" class="d-flex align-items-center">

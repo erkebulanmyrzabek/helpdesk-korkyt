@@ -1,22 +1,44 @@
 from django.contrib import admin
-from .models import Corpus, User, Ticket, Feedback
+from django import forms
+from .models import Corpus, User, Ticket, Feedback, SystemSetting
+
+class SystemSettingForm(forms.ModelForm):
+    class Meta:
+        model = SystemSetting
+        fields = '__all__'
+
+@admin.register(SystemSetting)
+class SystemSettingAdmin(admin.ModelAdmin):
+    form = SystemSettingForm
+    list_display = ('__str__', 'work_start_time', 'work_end_time')
+    
+    fieldsets = (
+        ('Рабочее время', {
+            'fields': ('work_start_time', 'work_end_time', 'allow_outside_working_hours')
+        }),
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
 
 @admin.register(Corpus)
 class CorpusAdmin(admin.ModelAdmin):
-    list_display = ('name', 'number')
+    list_display = ('id', 'name')
     search_fields = ('name',)
-    ordering = ('number', 'name')
+    ordering = ('id',)
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'first_name', 'last_name', 'role', 'corpus', 'is_checked_in', 'rating')
-    list_filter = ('role', 'corpus', 'is_checked_in')
+    list_display = ('username', 'first_name', 'last_name', 'role', 'rating')
+    list_filter = ('role',)
     search_fields = ('username', 'first_name', 'last_name')
     fieldsets = (
         (None, {'fields': ('username', 'password', 'plain_password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('role', 'corpus', 'is_active', 'is_staff', 'is_superuser')}),
-        ('Helpdesk Info', {'fields': ('is_checked_in', 'rating')}),
+        ('Permissions', {'fields': ('role', 'is_active', 'is_staff', 'is_superuser')}),
+        ('Helpdesk Info', {'fields': ('rating',)}),
     )
     readonly_fields = ('plain_password',)
 

@@ -16,7 +16,6 @@ const commentData = ref({
     text: ''
 })
 const currentTime = ref(new Date())
-let timerInterval = null
 
 const fetchTickets = async () => {
     try {
@@ -27,35 +26,17 @@ const fetchTickets = async () => {
     }
 }
 
-const checkIn = async () => {
-    try {
-        const response = await axios.post('users/check_in/')
-        authStore.user.is_checked_in = response.data.is_checked_in
-        fetchTickets() // Refresh tickets based on new status
-    } catch (e) {
-        console.error(e)
-    }
-}
+
 
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
-const myTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && ['TRANSIT', 'IN_PROGRESS'].includes(t.status)))
-const waitingTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'WAITING_APPROVE'))
-const completedTickets = computed(() => tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED'))
-
-const getTransitTime = (ticket) => {
-    if (!ticket.taken_at) return '00:00'
-    // Deadline for transit is taken_at + 10 mins? Requirement said "Calculate remaining time: (taken_at + 10 minutes) - now"
-    const taken = new Date(ticket.taken_at)
-    const deadline = new Date(taken.getTime() + 10 * 60000)
-    const now = currentTime.value
-    const diff = Math.floor((deadline - now) / 1000)
-    
-    if (diff <= 0) return 'Прибытие'
-    
-    const mins = Math.floor(diff / 60)
-    const secs = diff % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-}
+const myTickets = computed(() => {
+    if (!authStore.user) return []
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'IN_PROGRESS')
+})
+const completedTickets = computed(() => {
+    if (!authStore.user) return []
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && t.status === 'CLOSED')
+})
 
 const takeTicket = async (id) => {
     try {
@@ -66,14 +47,7 @@ const takeTicket = async (id) => {
     }
 }
 
-const arrive = async (id) => {
-    try {
-        await axios.post(`tickets/${id}/arrive/`)
-        fetchTickets()
-    } catch (error) {
-        alert(error.response?.data?.error || 'Ошибка')
-    }
-}
+
 
 const addComment = async () => {
     try {
@@ -114,39 +88,21 @@ const submitReport = async () => {
 
 onMounted(() => {
     fetchTickets()
-    timerInterval = setInterval(() => {
-        currentTime.value = new Date()
-    }, 1000)
 })
 
-onUnmounted(() => {
-    if (timerInterval) clearInterval(timerInterval)
-})
+
 </script>
 
 <template>
     <div class="container-fluid">
-        <!-- Check-in Status -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-3">
+             <div class="d-flex align-items-center gap-3">
                 <h3>Панель Хелпдеска</h3>
                 <Clock />
             </div>
-            <button 
-                class="btn" 
-                :class="authStore.user.is_checked_in ? 'btn-success' : 'btn-secondary'"
-                @click="checkIn"
-            >
-                <i class="bi" :class="authStore.user.is_checked_in ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
-                {{ authStore.user.is_checked_in ? 'На смене' : 'Не на смене' }}
-            </button>
         </div>
 
-        <div v-if="!authStore.user.is_checked_in" class="alert alert-warning text-center">
-            Вы не на смене. Нажмите кнопку выше, чтобы видеть заявки.
-        </div>
-
-        <div v-else class="row">
+        <div class="row">
             <!-- New Tickets -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100">
@@ -195,34 +151,29 @@ onUnmounted(() => {
                                 {{ ticket.building }}, {{ ticket.room }} ({{ ticket.status }})
                             </div>
                             
-                            <!-- Transit Timer -->
-                            <div v-if="ticket.status === 'TRANSIT'" class="alert alert-info py-1 mb-2">
-                                <i class="bi bi-stopwatch"></i> Прибытие через: <strong>{{ getTransitTime(ticket) }}</strong>
-                            </div>
+
 
                             <!-- Actions -->
                             <div class="d-flex gap-2 mt-2">
-                                <button v-if="ticket.status === 'TRANSIT'" class="btn btn-sm btn-primary" @click="arrive(ticket.id)">
-                                    Прибыл на место
-                                </button>
-                                <button v-else class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
+                                <button class="btn btn-sm btn-outline-secondary" @click="commentData.id = ticket.id">
                                     Комментарий
                                 </button>
-                                <button v-if="ticket.status !== 'TRANSIT'" class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
+                                <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
                             </div>
 
                             <!-- Comment Form -->
-                            <div v-if="commentData.id === ticket.id && ticket.status !== 'TRANSIT'" class="mt-2">
+                            <div v-if="commentData.id === ticket.id" class="mt-2">
                                 <textarea v-model="commentData.text" class="form-control form-control-sm mb-1" placeholder="Комментарий (продлит дедлайн)"></textarea>
                                 <button class="btn btn-sm btn-primary" @click="addComment">Отправить</button>
                             </div>
 
                             <!-- Finish Form -->
                             <div v-if="reportData.id === ticket.id" class="mt-2">
+                                <div class="form-text small mb-1">Фото (по желанию):</div>
                                 <input type="file" @change="handleReportImage" class="form-control form-control-sm mb-1" accept="image/*">
-                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий (опционально)"></textarea>
+                                <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий к выполнению" required></textarea>
                                 <button class="btn btn-sm btn-success w-100" @click="submitReport">Отправить отчет</button>
                             </div>
                         </div>
@@ -230,17 +181,13 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <!-- Waiting Approval / Closed -->
+            <!-- Closed -->
             <div class="col-md-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-success text-white border-bottom">
-                        <h5 class="mb-0">История / Ожидание</h5>
+                        <h5 class="mb-0">История</h5>
                     </div>
                     <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
-                        <div v-for="ticket in waitingTickets" :key="ticket.id" class="list-group-item p-3 bg-light">
-                            <h6 class="text-muted">#{{ ticket.id }} {{ ticket.title }}</h6>
-                            <span class="badge bg-warning text-dark">Ожидает подтверждения</span>
-                        </div>
                         <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="text-muted text-decoration-line-through">#{{ ticket.id }} {{ ticket.title }}</h6>
                             <span class="badge bg-success mb-2">Закрыто</span>

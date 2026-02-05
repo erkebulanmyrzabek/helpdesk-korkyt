@@ -1,37 +1,30 @@
 from rest_framework import serializers
-from .models import User, Ticket, Corpus, Feedback
+from .models import User, Ticket, Corpus, Feedback, SystemSetting
 
 class CorpusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Corpus
-        fields = ('id', 'name', 'number')
+        fields = ('id', 'name')
         read_only_fields = ('id',)
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    corpus_name = serializers.ReadOnlyField(source='corpus.name')
-    corpus_id = serializers.PrimaryKeyRelatedField(queryset=Corpus.objects.all(), source='corpus', required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'role', 'first_name', 'last_name', 'corpus', 'corpus_id', 'corpus_name', 'is_checked_in', 'rating', 'plain_password')
+        fields = ('id', 'username', 'email', 'password', 'role', 'first_name', 'last_name', 'rating', 'plain_password')
         extra_kwargs = {
-            'corpus': {'read_only': True},
             'rating': {'read_only': True},
             'plain_password': {'read_only': True}
         }
     
     def create(self, validated_data):
-        corpus = validated_data.pop('corpus', None)
         password = validated_data.get('password')
         
         # Save plain password
         validated_data['plain_password'] = password
         
         user = User.objects.create_user(**validated_data)
-        if corpus:
-            user.corpus = corpus
-            user.save()
         return user
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -57,15 +50,8 @@ class TicketSerializer(serializers.ModelSerializer):
     
     def get_duration_minutes(self, obj):
         return obj.get_duration()
-    
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context.get('request')
-        
-        # Masking logic for Helpdesk
-        if request and request.user.role == 'helpdesk':
-            # If ticket is NOT taken by this user, mask the room
-            if instance.assigned_to != request.user:
-                 data['room'] = "*****"
-        
-        return data
+
+class SystemSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemSetting
+        fields = '__all__'
