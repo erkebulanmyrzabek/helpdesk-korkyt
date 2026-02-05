@@ -161,7 +161,6 @@ const getStatusBadgeClass = (status) => {
         case 'WAITING_FOR_PARTS': return 'badge bg-info text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
-        case 'UNFIXABLE': return 'badge bg-danger';
         case 'CANCELED': return 'badge bg-dark';
         default: return 'badge bg-light text-dark';
     }
@@ -174,7 +173,6 @@ const getStatusText = (status) => {
         'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима',
         'CANCELED': 'Отменена'
     }
     return map[status] || status

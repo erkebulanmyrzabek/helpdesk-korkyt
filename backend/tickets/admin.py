@@ -44,7 +44,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'status', 'building', 'room', 'author', 'assigned_to', 'deadline', 'is_overdue')
+    list_display = ('id', 'title', 'status', 'building', 'room', 'author', 'assigned_to', 'is_overdue')
     list_filter = ('status', 'building', 'created_at', 'is_overdue')
     search_fields = ('title', 'description', 'author__username', 'assigned_to__username')
     readonly_fields = ('created_at', 'updated_at', 'taken_at', 'completed_at')

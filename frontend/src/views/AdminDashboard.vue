@@ -2,6 +2,11 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from '../axios'
 import Clock from '../components/Clock.vue'
+import AdminSubNav from '../components/AdminSubNav.vue'
+import { useRoute } from 'vue-router'
+import { watch } from 'vue'
+
+const route = useRoute()
 
 const stats = ref({
     total: 0,
@@ -24,10 +29,7 @@ const newUser = ref({
     last_name: '',
     role: 'teacher'
 })
-const extendDeadlineData = ref({
-    ticketId: null,
-    days: 3
-})
+
 const visiblePasswords = ref(new Set())
 const isCreatingUser = ref(false)
 
@@ -80,7 +82,12 @@ const togglePassword = (userId) => {
     }
 }
 
-const activeTab = ref('stats') // 'stats' or 'users'
+const activeTab = ref(route.query.tab || 'stats') // 'stats' or 'users'
+
+watch(() => route.query.tab, (newTab) => {
+    if (newTab) activeTab.value = newTab
+    else activeTab.value = 'stats'
+})
 
 const fetchStats = async () => {
     try {
@@ -146,28 +153,7 @@ const deleteUser = async (id) => {
     }
 }
 
-const markUnfixable = async (id) => {
-    if (!confirm('Пометить как неисправимую?')) return
-    try {
-        await axios.post(`tickets/${id}/mark_unfixable/`)
-        fetchTickets()
-        fetchStats()
-    } catch (error) {
-        alert('Ошибка')
-    }
-}
 
-const extendDeadline = async () => {
-    try {
-        await axios.post(`tickets/${extendDeadlineData.value.ticketId}/extend_deadline/`, {
-            days: extendDeadlineData.value.days
-        })
-        extendDeadlineData.value.ticketId = null
-        fetchTickets()
-    } catch (error) {
-        alert('Ошибка')
-    }
-}
 
 const getStatusLabel = (status) => {
     const map = {
@@ -176,7 +162,6 @@ const getStatusLabel = (status) => {
         'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима',
         'CANCELED': 'Отменена'
     }
     return map[status] || status
@@ -189,7 +174,6 @@ const getStatusColor = (status) => {
         case 'WAITING_FOR_PARTS': return 'bg-info text-dark';
         case 'WAITING_APPROVE': return 'bg-primary';
         case 'CLOSED': return 'bg-secondary';
-        case 'UNFIXABLE': return 'bg-danger';
         case 'CANCELED': return 'bg-dark';
         default: return 'bg-light text-dark';
     }
@@ -224,26 +208,7 @@ onMounted(() => {
 
 <template>
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-3">
-                <h2 class="text-primary mb-0"><i class="bi bi-speedometer2 me-2"></i>Панель администратора</h2>
-                <Clock />
-            </div>
-            <div class="btn-group">
-                <button class="btn" :class="activeTab === 'stats' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'stats'">
-                    <i class="bi bi-graph-up me-1"></i>Статистика
-                </button>
-                <button class="btn" :class="activeTab === 'users' ? 'btn-primary' : 'btn-outline-primary'" @click="activeTab = 'users'">
-                    <i class="bi bi-people me-1"></i>Пользователи
-                </button>
-                <router-link to="/admin/reviews" class="btn btn-outline-primary">
-                    <i class="bi bi-star me-1"></i>Отзывы
-                </router-link>
-                <router-link to="/admin/settings" class="btn btn-outline-primary">
-                    <i class="bi bi-gear me-1"></i>Настройки
-                </router-link>
-            </div>
-        </div>
+        <AdminSubNav />
         
         <!-- STATS & TICKETS TAB -->
         <div v-if="activeTab === 'stats'">
@@ -381,8 +346,6 @@ onMounted(() => {
                                 <th>Автор</th>
                                 <th>Исполнитель</th>
                                 <th>Место</th>
-                                <th>Дедлайн</th>
-                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -404,37 +367,9 @@ onMounted(() => {
                                 <td>{{ ticket.author_username }}</td>
                                 <td>{{ ticket.assigned_to_username || '-' }}</td>
                                 <td>{{ ticket.building }}, {{ ticket.room }}</td>
-                                <td>
-                                    {{ ticket.deadline ? new Date(ticket.deadline).toLocaleString('ru-RU', { timeZone: 'Asia/Almaty', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-' }}
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button v-if="ticket.status !== 'CLOSED' && ticket.status !== 'UNFIXABLE'" class="btn btn-outline-danger" title="Неисправимо" @click="markUnfixable(ticket.id)">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                        <button class="btn btn-outline-warning" title="Продлить дедлайн" @click="extendDeadlineData.ticketId = ticket.id">
-                                            <i class="bi bi-clock-history"></i>
-                                        </button>
-                                    </div>
-                                </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-            
-            <!-- Extend Deadline Modal (Simple implementation) -->
-            <div v-if="extendDeadlineData.ticketId" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.5); z-index: 1000;">
-                <div class="card p-4" style="width: 300px;">
-                    <h5>Продлить дедлайн</h5>
-                    <div class="mb-3">
-                        <label>Дней:</label>
-                        <input type="number" v-model="extendDeadlineData.days" class="form-control">
-                    </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-secondary" @click="extendDeadlineData.ticketId = null">Отмена</button>
-                        <button class="btn btn-primary" @click="extendDeadline">Продлить</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -503,7 +438,6 @@ onMounted(() => {
                                         <th>Имя</th>
                                         <th>Роль</th>
                                         <th>Пароль</th>
-                                        <th>Действия</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -524,11 +458,6 @@ onMounted(() => {
                                                 </button>
                                             </div>
                                             <span v-else class="text-muted small">Не сохранен</span>
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-danger" @click="deleteUser(user.id)" v-if="user.username !== 'admin'">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>

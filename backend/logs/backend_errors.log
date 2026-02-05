@@ -439,3 +439,648 @@ INFO 2026-02-04 17:17:32,920 basehttp "GET /api/users/ HTTP/1.1" 200 763
 INFO 2026-02-04 17:17:32,924 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
 INFO 2026-02-04 17:17:32,931 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
 INFO 2026-02-04 17:17:32,944 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-05 12:20:24,325 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:23:08,055 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 12:23:08,065 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 12:23:08,104 basehttp "OPTIONS /api/tickets/stats/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:23:08,107 basehttp "OPTIONS /api/tickets/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:23:08,109 basehttp "OPTIONS /api/users/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:23:08,115 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:23:08,124 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:23:08,127 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-05 12:23:08,144 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-05 12:25:07,744 basehttp "OPTIONS /api/settings/current/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:25:07,744 basehttp "OPTIONS /api/corpuses/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:25:07,775 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 12:25:07,776 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:29:14,432 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 12:29:14,433 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:32:39,773 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:32:39,774 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:32:39,778 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-05 12:32:39,793 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-05 12:32:46,745 basehttp "OPTIONS /api/tickets/14/extend_deadline/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:32:46,766 basehttp "POST /api/tickets/14/extend_deadline/ HTTP/1.1" 200 636
+INFO 2026-02-05 12:32:46,813 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-05 12:33:01,795 basehttp "OPTIONS /api/api-token-auth/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:33:02,040 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-05 12:33:02,046 basehttp "OPTIONS /api/users/me/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:33:02,052 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-05 12:33:02,097 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:33:02,102 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 12:33:02,116 basehttp "GET /api/tickets/ HTTP/1.1" 200 12379
+INFO 2026-02-05 12:33:02,126 basehttp "GET /media/tickets/after/computer-isolated-transparent-background_191095-25977.avif HTTP/1.1" 304 0
+INFO 2026-02-05 12:33:16,020 basehttp "POST /api/tickets/ HTTP/1.1" 201 509
+INFO 2026-02-05 12:33:16,068 basehttp "GET /api/tickets/ HTTP/1.1" 200 12889
+INFO 2026-02-05 12:33:38,461 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-05 12:33:38,471 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-05 12:33:38,517 basehttp "GET /api/tickets/ HTTP/1.1" 200 12889
+INFO 2026-02-05 12:33:40,553 basehttp "OPTIONS /api/tickets/18/take/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:33:40,624 basehttp "POST /api/tickets/18/take/ HTTP/1.1" 200 631
+INFO 2026-02-05 12:33:40,651 basehttp "GET /api/tickets/ HTTP/1.1" 200 13011
+INFO 2026-02-05 12:34:16,698 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-05 12:34:16,706 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-05 12:34:16,731 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:34:16,736 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 12:34:16,754 basehttp "GET /api/tickets/ HTTP/1.1" 200 13011
+INFO 2026-02-05 12:34:18,933 basehttp "OPTIONS /api/tickets/18/cancel/ HTTP/1.1" 200 0
+INFO 2026-02-05 12:34:18,951 basehttp "POST /api/tickets/18/cancel/ HTTP/1.1" 200 628
+INFO 2026-02-05 12:34:18,998 basehttp "GET /api/tickets/ HTTP/1.1" 200 13008
+INFO 2026-02-05 12:34:24,037 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-05 12:34:24,046 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-05 12:34:24,090 basehttp "GET /api/tickets/ HTTP/1.1" 200 13008
+INFO 2026-02-05 12:44:37,441 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 12:44:37,815 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:44:41,094 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/models.py changed, reloading.
+INFO 2026-02-05 12:44:41,319 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:44:49,198 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 12:44:49,207 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 12:44:49,252 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:44:49,254 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:44:49,256 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 596
+INFO 2026-02-05 12:44:49,273 basehttp "GET /api/tickets/ HTTP/1.1" 200 13008
+INFO 2026-02-05 12:45:12,050 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-05 12:45:12,059 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-05 12:45:12,090 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:45:12,092 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 12:45:12,113 basehttp "GET /api/tickets/ HTTP/1.1" 200 13008
+INFO 2026-02-05 12:45:12,121 basehttp "GET /media/tickets/after/computer-isolated-transparent-background_191095-25977.avif HTTP/1.1" 304 0
+INFO 2026-02-05 12:45:22,333 basehttp "POST /api/tickets/ HTTP/1.1" 201 485
+INFO 2026-02-05 12:45:22,373 basehttp "GET /api/tickets/ HTTP/1.1" 200 13494
+INFO 2026-02-05 12:45:31,099 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 12:45:31,113 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 12:45:31,153 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:45:31,153 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:45:31,162 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 12:45:31,177 basehttp "GET /api/tickets/ HTTP/1.1" 200 13494
+INFO 2026-02-05 12:46:05,545 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/models.py changed, reloading.
+INFO 2026-02-05 12:46:05,893 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:47:14,277 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/admin.py changed, reloading.
+INFO 2026-02-05 12:47:14,564 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:47:18,853 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/serializers.py changed, reloading.
+INFO 2026-02-05 12:47:19,084 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:47:42,255 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 12:47:42,563 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 12:48:20,717 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:48:20,722 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:48:20,726 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 12:48:20,742 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 12:48:33,074 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 12:48:33,168 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 12:48:33,175 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 12:48:33,247 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:09:18,522 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:09:18,523 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:09:18,529 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:09:18,543 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:21:22,164 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 13:21:22,175 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 13:21:22,270 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:21:22,272 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:21:22,273 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:21:22,293 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:39:29,349 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:39:29,349 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:39:29,351 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:39:29,377 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:44:43,730 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 13:44:44,045 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 13:46:15,311 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 13:50:01,592 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 13:50:09,403 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 13:50:09,450 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:50:09,452 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:50:09,472 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:50:13,268 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:50:13,268 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:50:13,286 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:50:13,303 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:50:14,962 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:50:14,962 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:50:14,985 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:50:19,742 basehttp "OPTIONS /api/tickets/export_report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 13:50:19,812 basehttp "GET /api/tickets/export_report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 6500
+INFO 2026-02-05 13:51:47,707 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 13:51:47,739 basehttp "GET /api/tickets/report/?statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8268
+INFO 2026-02-05 13:51:49,530 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 13:51:49,571 basehttp "GET /api/tickets/report/?statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8268
+INFO 2026-02-05 13:51:54,079 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 13:51:54,123 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8268
+INFO 2026-02-05 13:51:57,846 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 13:51:57,877 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7135
+INFO 2026-02-05 13:52:00,449 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 0
+INFO 2026-02-05 13:52:00,484 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 5486
+INFO 2026-02-05 13:52:15,264 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=CLOSED HTTP/1.1" 200 0
+INFO 2026-02-05 13:52:15,300 basehttp "GET /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=CLOSED HTTP/1.1" 200 5486
+INFO 2026-02-05 13:52:19,375 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=CLOSED HTTP/1.1" 200 0
+INFO 2026-02-05 13:52:19,412 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=CLOSED HTTP/1.1" 200 4875
+INFO 2026-02-05 13:52:35,409 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:52:35,414 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:52:35,417 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:52:35,435 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:07,405 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:07,405 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:07,420 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:53:10,683 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:10,686 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:10,691 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:10,708 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:12,157 basehttp "OPTIONS /api/feedbacks/ HTTP/1.1" 200 0
+INFO 2026-02-05 13:53:12,185 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 13:53:15,315 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:15,315 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:15,321 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:15,338 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:17,074 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 13:53:17,074 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:21,640 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:21,642 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:21,646 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:21,664 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:22,878 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:22,878 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 13:53:24,385 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:24,388 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:24,392 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:24,414 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:25,835 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 13:53:27,469 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:27,476 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:27,477 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:27,497 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:28,468 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:28,474 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:28,490 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:53:31,793 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:31,795 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:31,805 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:31,819 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:32,907 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 13:53:32,907 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:35,153 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:35,159 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:35,164 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:35,182 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:53:42,513 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:42,514 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:42,529 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:53:47,525 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:53:47,528 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:53:47,530 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:53:47,550 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:55:17,706 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:55:17,707 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:55:17,720 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:55:28,672 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:55:28,673 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:55:28,675 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:55:28,693 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:56:43,949 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:56:43,951 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:56:43,955 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:56:43,958 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:56:43,960 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:56:43,977 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:56:43,978 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:56:43,996 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:57:44,008 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:57:44,010 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:44,029 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:57:44,716 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 13:57:45,202 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:45,202 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 13:57:46,013 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:57:46,015 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:46,023 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:57:46,038 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:57:47,061 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:47,064 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:57:47,081 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:57:47,430 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 13:57:47,833 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:57:47,833 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:47,853 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:57:48,137 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:57:48,141 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:57:48,144 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:57:48,160 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:58:03,332 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:58:03,332 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:58:03,352 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:58:03,702 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 13:58:04,198 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:58:04,198 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 13:58:09,431 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:58:09,433 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:58:09,437 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 13:58:09,453 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 13:58:12,208 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:58:12,209 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:58:12,224 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:58:58,826 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 13:58:59,168 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 13:59:25,720 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 13:59:25,721 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 13:59:25,736 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 13:59:37,488 basehttp "OPTIONS /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+ERROR 2026-02-05 13:59:37,554 log Internal Server Error: /api/tickets/export_pdf_stats/
+Traceback (most recent call last):
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py", line 375, in export_pdf_stats
+    name = f"{s['assigned_to_first_name']} {s['assigned_to_last_name']}".strip() or s['assigned_to_username']
+KeyError: 'assigned_to_first_name'
+ERROR 2026-02-05 13:59:37,559 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 500 92841
+INFO 2026-02-05 14:00:23,136 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:00:23,515 autoreload Watching for file changes with StatReloader
+ERROR 2026-02-05 14:00:46,902 log Internal Server Error: /api/tickets/export_pdf_stats/
+Traceback (most recent call last):
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 698, in getFont
+    return _fonts[fontName]
+KeyError: 'Arial-Bold'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py", line 430, in export_pdf_stats
+    p.setFont(font_name + "-Bold" if font_name == "Arial" else font_name, 12)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfgen/canvas.py", line 1738, in setFont
+    font = pdfmetrics.getFont(self._fontname)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 700, in getFont
+    return findFontAndRegister(fontName)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 682, in findFontAndRegister
+    face = getTypeFace(fontName)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 639, in getTypeFace
+    return _typefaces[faceName]
+KeyError: 'Arial-Bold'
+ERROR 2026-02-05 14:00:46,909 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 500 114811
+INFO 2026-02-05 14:00:51,033 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:00:56,608 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:00:56,608 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:00:56,675 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+ERROR 2026-02-05 14:00:58,533 log Internal Server Error: /api/tickets/export_pdf_stats/
+Traceback (most recent call last):
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 698, in getFont
+    return _fonts[fontName]
+KeyError: 'Arial-Bold'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py", line 430, in export_pdf_stats
+    p.setFont(font_name + "-Bold" if font_name == "Arial" else font_name, 12)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfgen/canvas.py", line 1738, in setFont
+    font = pdfmetrics.getFont(self._fontname)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 700, in getFont
+    return findFontAndRegister(fontName)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 682, in findFontAndRegister
+    face = getTypeFace(fontName)
+  File "/Users/erasylbaktybergenov/Documents/helpdesk-korkyt/.venv/lib/python3.9/site-packages/reportlab/pdfbase/pdfmetrics.py", line 639, in getTypeFace
+    return _typefaces[faceName]
+KeyError: 'Arial-Bold'
+ERROR 2026-02-05 14:00:58,540 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 500 114811
+INFO 2026-02-05 14:01:54,181 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:01:54,522 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:02:10,713 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 97897
+INFO 2026-02-05 14:02:47,045 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:02:47,051 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:02:47,074 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:02:51,336 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 97897
+INFO 2026-02-05 14:06:09,627 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:06:10,052 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:06:28,705 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:06:29,071 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:06:34,892 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:06:35,199 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:06:36,774 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:06:36,807 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:06:37,372 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:06:37,417 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:06:38,224 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8268
+INFO 2026-02-05 14:06:40,474 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:06:40,513 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 6619
+INFO 2026-02-05 14:07:38,462 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 5486
+INFO 2026-02-05 14:08:40,088 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:08:40,089 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:08:40,104 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:08:44,302 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 115960
+INFO 2026-02-05 14:10:03,501 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:10:03,563 basehttp "GET /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:10:06,446 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:10:06,482 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 5385
+INFO 2026-02-05 14:10:08,367 basehttp "OPTIONS /api/tickets/export_pdf_stats/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:10:08,538 basehttp "GET /api/tickets/export_pdf_stats/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 114898
+INFO 2026-02-05 14:11:00,808 basehttp "OPTIONS /api/tickets/export_report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 0
+INFO 2026-02-05 14:11:00,880 basehttp "GET /api/tickets/export_report/?date_from=2026-02-02&date_to=2026-02-03&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 6091
+INFO 2026-02-05 14:12:21,337 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:12:21,340 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:12:21,368 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 8738
+INFO 2026-02-05 14:17:29,452 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:17:29,867 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:17:39,512 basehttp "GET /api/tickets/export_report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=UNFIXABLE HTTP/1.1" 200 6322
+INFO 2026-02-05 14:18:47,262 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:18:47,266 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:18:47,267 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 14:18:47,284 basehttp "GET /api/tickets/ HTTP/1.1" 200 12822
+INFO 2026-02-05 14:19:31,792 basehttp "OPTIONS /api/tickets/18/mark_unfixable/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:19:31,807 basehttp "POST /api/tickets/18/mark_unfixable/ HTTP/1.1" 200 590
+INFO 2026-02-05 14:19:31,826 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 623
+INFO 2026-02-05 14:19:31,848 basehttp "GET /api/tickets/ HTTP/1.1" 200 12823
+INFO 2026-02-05 14:21:02,486 basehttp "GET /admin HTTP/1.1" 301 0
+INFO 2026-02-05 14:21:02,502 basehttp "GET /admin/ HTTP/1.1" 302 0
+INFO 2026-02-05 14:21:02,526 basehttp "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4185
+INFO 2026-02-05 14:21:03,018 basehttp "GET /static/admin/css/login.css HTTP/1.1" 200 958
+INFO 2026-02-05 14:21:03,020 basehttp "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2694
+INFO 2026-02-05 14:21:03,020 basehttp "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2929
+INFO 2026-02-05 14:21:03,021 basehttp "GET /static/admin/css/base.css HTTP/1.1" 200 21310
+INFO 2026-02-05 14:21:03,022 basehttp "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+INFO 2026-02-05 14:21:03,023 basehttp "GET /static/admin/js/theme.js HTTP/1.1" 200 1943
+INFO 2026-02-05 14:21:03,023 basehttp "GET /static/admin/css/responsive.css HTTP/1.1" 200 18559
+INFO 2026-02-05 14:21:12,455 basehttp "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2026-02-05 14:21:12,469 basehttp "GET /admin/ HTTP/1.1" 200 8186
+INFO 2026-02-05 14:21:12,498 basehttp "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2026-02-05 14:21:12,506 basehttp "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2026-02-05 14:21:12,507 basehttp "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+INFO 2026-02-05 14:21:19,226 basehttp "GET /admin/tickets/ticket/ HTTP/1.1" 200 25048
+INFO 2026-02-05 14:21:19,258 basehttp "GET /static/admin/css/changelists.css HTTP/1.1" 200 6566
+INFO 2026-02-05 14:21:19,271 basehttp "GET /static/admin/js/actions.js HTTP/1.1" 200 7872
+INFO 2026-02-05 14:21:19,273 basehttp "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+INFO 2026-02-05 14:21:19,273 basehttp "GET /static/admin/js/core.js HTTP/1.1" 200 5682
+INFO 2026-02-05 14:21:19,277 basehttp "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 8943
+INFO 2026-02-05 14:21:19,282 basehttp "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+INFO 2026-02-05 14:21:19,285 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-02-05 14:21:19,286 basehttp "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+INFO 2026-02-05 14:21:19,286 basehttp "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+INFO 2026-02-05 14:21:19,287 basehttp "GET /static/admin/img/icon-no.svg HTTP/1.1" 200 560
+INFO 2026-02-05 14:21:19,290 basehttp "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 292458
+INFO 2026-02-05 14:21:19,291 basehttp "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 232381
+INFO 2026-02-05 14:21:19,294 basehttp "GET /static/admin/js/filters.js HTTP/1.1" 200 978
+INFO 2026-02-05 14:21:19,305 basehttp "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+INFO 2026-02-05 14:21:26,127 basehttp "GET /admin/ HTTP/1.1" 200 8186
+INFO 2026-02-05 14:21:27,654 basehttp "GET /admin/tickets/ticket/ HTTP/1.1" 200 25048
+INFO 2026-02-05 14:21:27,688 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-02-05 14:21:51,731 basehttp "POST /admin/tickets/ticket/ HTTP/1.1" 200 10434
+INFO 2026-02-05 14:21:51,759 basehttp "GET /static/admin/js/cancel.js HTTP/1.1" 200 884
+INFO 2026-02-05 14:21:52,775 basehttp "POST /admin/tickets/ticket/ HTTP/1.1" 302 0
+INFO 2026-02-05 14:21:52,804 basehttp "GET /admin/tickets/ticket/ HTTP/1.1" 200 19744
+INFO 2026-02-05 14:21:52,842 basehttp "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+INFO 2026-02-05 14:21:52,865 basehttp "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+INFO 2026-02-05 14:22:00,233 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/models.py changed, reloading.
+INFO 2026-02-05 14:22:00,679 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:22:09,749 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:22:09,749 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:22:09,773 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:22:09,909 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:22:14,788 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:22:14,789 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:22:14,792 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:22:14,803 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:24:06,554 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 14:24:06,938 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 14:24:27,325 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:24:27,326 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:24:27,331 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:24:27,337 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:24:27,341 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:24:27,345 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:24:27,351 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:24:27,366 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:24:35,031 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:24:35,037 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:24:35,042 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:24:35,047 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:24:35,050 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:24:35,058 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:24:35,062 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:24:35,085 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:24:54,126 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:24:54,141 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:24:54,153 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:24:54,173 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:25:49,820 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:25:49,828 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:25:49,833 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:25:49,845 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7015
+INFO 2026-02-05 14:25:50,885 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 806
+INFO 2026-02-05 14:25:51,412 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:25:51,412 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 14:25:52,698 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:25:52,700 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:25:52,704 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:25:52,718 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:25:53,702 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 14:25:53,704 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:25:59,954 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:25:59,960 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:25:59,963 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:25:59,973 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:26:47,739 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:26:47,740 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:26:47,803 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7015
+INFO 2026-02-05 14:27:09,133 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:27:09,133 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:27:09,139 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 520
+INFO 2026-02-05 14:27:09,146 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:27:24,287 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-05 14:27:24,296 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-05 14:27:24,340 basehttp "GET /api/tickets/ HTTP/1.1" 200 7015
+INFO 2026-02-05 14:27:25,918 basehttp "OPTIONS /api/tickets/19/take/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:27:25,936 basehttp "POST /api/tickets/19/take/ HTTP/1.1" 200 568
+INFO 2026-02-05 14:27:25,974 basehttp "GET /api/tickets/ HTTP/1.1" 200 7114
+INFO 2026-02-05 14:27:43,285 basehttp "OPTIONS /api/tickets/19/need-parts/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:27:43,301 basehttp "POST /api/tickets/19/need-parts/ HTTP/1.1" 200 578
+INFO 2026-02-05 14:27:43,337 basehttp "GET /api/tickets/ HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:08,340 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:30:08,358 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:30:08,445 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:30:08,452 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:30:08,460 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 534
+INFO 2026-02-05 14:30:08,466 basehttp "GET /api/tickets/ HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:13,948 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:30:13,949 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:30:13,961 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:25,323 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:25,374 basehttp "GET /api/tickets/report/?date_from=2026-02-02&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:29,388 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:29,430 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:52,745 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:52,782 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:53,913 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:53,950 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:55,007 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=NEW HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:55,037 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=NEW HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:55,934 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:57,295 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:57,333 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:58,297 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:59,016 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS HTTP/1.1" 200 7124
+INFO 2026-02-05 14:30:59,494 basehttp "OPTIONS /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=NEW HTTP/1.1" 200 0
+INFO 2026-02-05 14:30:59,535 basehttp "GET /api/tickets/report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=NEW HTTP/1.1" 200 7124
+INFO 2026-02-05 14:31:02,393 basehttp "OPTIONS /api/tickets/export_report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=NEW HTTP/1.1" 200 0
+INFO 2026-02-05 14:31:02,469 basehttp "GET /api/tickets/export_report/?date_from=2026-02-02&date_to=2026-02-05&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=NEW HTTP/1.1" 200 6141
+INFO 2026-02-05 14:32:25,058 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-05 14:32:25,069 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-05 14:32:25,113 basehttp "GET /api/tickets/ HTTP/1.1" 200 7124
+INFO 2026-02-05 14:32:47,823 basehttp "OPTIONS /api/tickets/19/complete/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:32:47,850 basehttp "POST /api/tickets/19/complete/ HTTP/1.1" 200 592
+INFO 2026-02-05 14:32:47,884 basehttp "GET /api/tickets/ HTTP/1.1" 200 7138
+INFO 2026-02-05 14:32:56,056 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-05 14:32:56,064 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-05 14:32:56,112 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:32:56,121 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 14:32:56,132 basehttp "GET /api/tickets/ HTTP/1.1" 200 7138
+INFO 2026-02-05 14:33:06,385 basehttp "OPTIONS /api/tickets/19/leave_feedback/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:33:06,403 basehttp "POST /api/tickets/19/leave_feedback/ HTTP/1.1" 200 29
+INFO 2026-02-05 14:33:06,444 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:33:14,293 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:33:14,305 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:33:14,346 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:33:14,347 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:33:14,357 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:33:14,374 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:33:21,938 basehttp "GET /api/feedbacks/ HTTP/1.1" 200 1011
+INFO 2026-02-05 14:33:30,839 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:33:30,848 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:33:30,878 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:33:30,883 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:33:30,883 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:33:30,891 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:33:37,916 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 70
+INFO 2026-02-05 14:33:37,930 basehttp "GET /api/users/me/ HTTP/1.1" 200 145
+INFO 2026-02-05 14:33:38,011 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:34:19,484 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:34:19,494 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:34:19,545 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:34:19,549 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:34:19,551 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:34:19,560 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:37:45,667 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:37:45,676 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:37:45,738 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:37:45,740 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:37:45,745 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:37:45,753 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:37:56,135 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:37:56,136 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:37:56,151 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7338
+INFO 2026-02-05 14:38:01,269 basehttp "OPTIONS /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 14:38:01,491 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 116219
+INFO 2026-02-05 14:43:45,266 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:43:45,273 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:43:45,279 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:43:45,295 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:47:27,183 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:47:27,195 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:47:27,270 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:47:27,271 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:47:27,272 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:47:27,282 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:49:26,972 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:49:26,983 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:49:27,031 basehttp "OPTIONS /api/tickets/stats/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:49:27,039 basehttp "OPTIONS /api/users/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:49:27,040 basehttp "OPTIONS /api/tickets/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:49:27,058 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:49:27,059 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:49:27,063 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:49:27,071 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:50:43,972 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 69
+INFO 2026-02-05 14:50:43,986 basehttp "GET /api/users/me/ HTTP/1.1" 200 142
+INFO 2026-02-05 14:50:44,034 basehttp "OPTIONS /api/settings/current/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:50:44,037 basehttp "OPTIONS /api/corpuses/ HTTP/1.1" 200 0
+INFO 2026-02-05 14:50:44,051 basehttp "GET /api/settings/current/ HTTP/1.1" 200 99
+INFO 2026-02-05 14:50:44,051 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:50:44,063 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:51:16,104 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 14:51:16,114 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 14:51:16,165 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:51:16,168 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:51:16,174 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:51:16,179 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:55:15,998 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:55:16,025 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:55:16,029 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:55:16,107 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:55:16,118 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:55:16,119 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:55:16,126 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 14:55:16,131 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 14:55:16,132 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:55:16,140 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 14:55:16,150 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 14:55:16,174 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 15:24:10,657 basehttp "OPTIONS /api/api-token-auth/ HTTP/1.1" 200 0
+INFO 2026-02-05 15:24:10,892 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 15:24:10,901 basehttp "OPTIONS /api/users/me/ HTTP/1.1" 200 0
+INFO 2026-02-05 15:24:10,906 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 15:24:10,946 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 15:24:10,946 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 15:24:10,948 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 15:24:10,960 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 15:24:48,974 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 15:24:48,981 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 15:24:49,009 basehttp "GET /api/tickets/report/?statuses%5B%5D=NEW&statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7338
+INFO 2026-02-05 15:25:12,565 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 15:25:12,589 basehttp "GET /api/tickets/report/?statuses%5B%5D=IN_PROGRESS&statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7338
+INFO 2026-02-05 15:25:13,230 basehttp "OPTIONS /api/tickets/report/?statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 0
+INFO 2026-02-05 15:25:13,272 basehttp "GET /api/tickets/report/?statuses%5B%5D=WAITING_FOR_PARTS&statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7338
+INFO 2026-02-05 15:25:14,231 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED&statuses%5B%5D=CANCELED HTTP/1.1" 200 7338
+INFO 2026-02-05 15:25:16,813 basehttp "GET /api/tickets/report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 6279
+INFO 2026-02-05 15:25:22,378 basehttp "OPTIONS /api/tickets/export_report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 0
+INFO 2026-02-05 15:25:22,429 basehttp "GET /api/tickets/export_report/?statuses%5B%5D=CLOSED HTTP/1.1" 200 5976
+INFO 2026-02-05 15:27:27,938 autoreload /Users/erasylbaktybergenov/Documents/helpdesk-korkyt/backend/tickets/views.py changed, reloading.
+INFO 2026-02-05 15:27:28,375 autoreload Watching for file changes with StatReloader
+INFO 2026-02-05 15:28:06,612 basehttp "POST /api/api-token-auth/ HTTP/1.1" 200 67
+INFO 2026-02-05 15:28:06,623 basehttp "GET /api/users/me/ HTTP/1.1" 200 137
+INFO 2026-02-05 15:28:06,722 basehttp "GET /api/users/ HTTP/1.1" 200 763
+INFO 2026-02-05 15:28:06,727 basehttp "GET /api/corpuses/ HTTP/1.1" 200 346
+INFO 2026-02-05 15:28:06,729 basehttp "GET /api/tickets/stats/ HTTP/1.1" 200 493
+INFO 2026-02-05 15:28:06,748 basehttp "GET /api/tickets/ HTTP/1.1" 200 7338
+INFO 2026-02-05 15:29:37,491 basehttp "OPTIONS /api/tickets/export_pdf_stats/?statuses%5B%5D=CLOSED HTTP/1.1" 200 0
+INFO 2026-02-05 15:29:37,702 basehttp "GET /api/tickets/export_pdf_stats/?statuses%5B%5D=CLOSED HTTP/1.1" 200 116818

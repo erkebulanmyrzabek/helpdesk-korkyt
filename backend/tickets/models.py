@@ -33,7 +33,6 @@ class Ticket(models.Model):
         ('IN_PROGRESS', 'В работе'),
         ('WAITING_FOR_PARTS', 'Ожидается запчасть'),
         ('CLOSED', 'Закрыта'),
-        ('UNFIXABLE', 'Неисправима'),
         ('CANCELED', 'Отменена'),
     )
 
@@ -63,7 +62,6 @@ class Ticket(models.Model):
     taken_at = models.DateTimeField("Взят в работу", null=True, blank=True)
     started_at = models.DateTimeField("Начало работы", null=True, blank=True) # Kept for legacy/stats if needed, or alias to taken_at
     completed_at = models.DateTimeField("Время завершения", null=True, blank=True)
-    deadline = models.DateTimeField("Дедлайн", null=True, blank=True)
     
     is_overdue = models.BooleanField("Просрочена", default=False)
 

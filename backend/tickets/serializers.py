@@ -46,7 +46,7 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = '__all__'
-        read_only_fields = ('author', 'created_at', 'updated_at', 'taken_at', 'started_at', 'completed_at', 'deadline', 'is_overdue', 'status')
+        read_only_fields = ('author', 'created_at', 'updated_at', 'taken_at', 'started_at', 'completed_at', 'is_overdue', 'status')
     
     def get_duration_minutes(self, obj):
         return obj.get_duration()

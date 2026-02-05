@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from '../axios'
+import AdminSubNav from '../components/AdminSubNav.vue'
 
 const feedbacks = ref([])
 const helperFilter = ref('')
@@ -50,17 +51,16 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid pb-5">
+        <AdminSubNav />
+
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary mb-0"><i class="bi bi-star me-2"></i>Все отзывы</h2>
+            <h4 class="text-muted mb-0"><i class="bi bi-star me-2"></i>Отзывы пользователей</h4>
             <div class="d-flex gap-3 align-items-center">
                 <select v-model="helperFilter" class="form-select form-select-sm" style="width: 200px;">
                     <option value="">Все хелперы</option>
                     <option v-for="helper in uniqueHelpers" :key="helper" :value="helper">{{ helper }}</option>
                 </select>
-                <router-link to="/admin" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Назад
-                </router-link>
             </div>
         </div>
 

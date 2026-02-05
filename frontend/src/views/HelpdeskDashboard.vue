@@ -32,7 +32,7 @@ const myTickets = computed(() => {
 })
 const completedTickets = computed(() => {
     if (!authStore.user) return []
-    return tickets.value.filter(t => t.assigned_to === authStore.user.id && (t.status === 'CLOSED' || t.status === 'UNFIXABLE' || t.status === 'CANCELED'))
+    return tickets.value.filter(t => t.assigned_to === authStore.user.id && (t.status === 'CLOSED' || t.status === 'CANCELED'))
 })
 
 const getStatusText = (status) => {
@@ -42,7 +42,6 @@ const getStatusText = (status) => {
         'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима',
         'CANCELED': 'Отменена'
     }
     return map[status] || status
@@ -55,7 +54,6 @@ const getStatusBadgeClass = (status) => {
         case 'WAITING_FOR_PARTS': return 'badge bg-info text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
-        case 'UNFIXABLE': return 'badge bg-danger';
         case 'CANCELED': return 'badge bg-dark';
         default: return 'badge bg-light text-dark';
     }
