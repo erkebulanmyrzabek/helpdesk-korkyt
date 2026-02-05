@@ -6,12 +6,37 @@ import AdminSubNav from '../components/AdminSubNav.vue'
 const feedbacks = ref([])
 const helperFilter = ref('')
 
+const notifications = ref({
+    new_requests: 0,
+    new_feedbacks: 0
+})
+
 const fetchFeedbacks = async () => {
     try {
         const response = await axios.get('feedbacks/')
         feedbacks.value = response.data
+        // Mark as viewed when admin opens this page
+        await markFeedbacksViewed()
     } catch (error) {
         console.error(error)
+    }
+}
+
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get('admin/notifications/summary/')
+        notifications.value = response.data
+    } catch (error) {
+        console.error('Error fetching notifications:', error)
+    }
+}
+
+const markFeedbacksViewed = async () => {
+    try {
+        await axios.post('admin/notifications/mark-feedbacks-viewed/')
+        notifications.value.new_feedbacks = 0
+    } catch (error) {
+        console.error('Error marking feedbacks as viewed:', error)
     }
 }
 
@@ -46,13 +71,17 @@ const formatDate = (dateString) => {
 }
 
 onMounted(() => {
+    fetchNotifications()
     fetchFeedbacks()
 })
 </script>
 
 <template>
     <div class="container-fluid pb-5">
-        <AdminSubNav />
+        <AdminSubNav 
+            :newRequests="notifications.new_requests" 
+            :newFeedbacks="notifications.new_feedbacks"
+        />
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="text-muted mb-0"><i class="bi bi-star me-2"></i>Отзывы пользователей</h4>

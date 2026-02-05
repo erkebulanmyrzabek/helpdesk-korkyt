@@ -5,8 +5,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.conf import settings
-from .models import Ticket, User, Corpus, Feedback, SystemSetting
-from .serializers import TicketSerializer, UserSerializer, CorpusSerializer, FeedbackSerializer, SystemSettingSerializer
+from .models import Ticket, User, Corpus, Feedback, SystemSetting, RegistrationRequest
+from .serializers import (
+    TicketSerializer, UserSerializer, CorpusSerializer, 
+    FeedbackSerializer, SystemSettingSerializer, RegistrationRequestSerializer
+)
 from django.db.models import Count, Q, Avg
 from django.utils import timezone
 import datetime
@@ -36,6 +39,10 @@ class IsHelpdesk(permissions.BasePermission):
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'admin'
+
+class IsAdminOrHelpdesk(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ['admin', 'helpdesk']
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
@@ -84,15 +91,12 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        # Base ordering: Overdue first, then newest
-        base_qs = Ticket.objects.all().order_by('-is_overdue', '-created_at')
         
         if user.role == 'teacher':
-            return base_qs.filter(author=user)
-        elif user.role == 'helpdesk':
-            return base_qs
-        elif user.role == 'admin':
-            return base_qs
+            return Ticket.objects.filter(author=user).order_by('-is_overdue', '-created_at')
+        elif user.role in ['admin', 'helpdesk']:
+            return self._get_report_queryset(self.request)
+            
         return Ticket.objects.none()
 
     def perform_create(self, serializer):
@@ -108,7 +112,9 @@ class TicketViewSet(viewsets.ModelViewSet):
                      "detail": f"Заявки принимаются только с {sys_settings.work_start_time.strftime('%H:%M')} до {sys_settings.work_end_time.strftime('%H:%M')}."
                  })
 
-        ticket = serializer.save(author=self.request.user)
+        author = self.request.user
+        author_name = author.full_name or author.get_full_name() or author.username
+        ticket = serializer.save(author=author, author_name_display=author_name)
 
     @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk])
     def take(self, request, pk=None):
@@ -491,7 +497,15 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), IsAdmin()]
         if self.action in ['list', 'destroy']:
              return [permissions.IsAuthenticated(), IsAdmin()]
+        if self.action == 'details':
+             return [permissions.IsAuthenticated(), IsAdminOrHelpdesk()]
         return [permissions.IsAuthenticated()]
+
+    @action(detail=True, methods=['get'])
+    def details(self, request, pk=None):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -520,3 +534,55 @@ class SystemSettingViewSet(viewsets.ModelViewSet):
         settings = SystemSetting.get_settings()
         serializer = self.get_serializer(settings)
         return Response(serializer.data)
+
+class RegistrationRequestViewSet(viewsets.ModelViewSet):
+    queryset = RegistrationRequest.objects.all()
+    serializer_class = RegistrationRequestSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsAdmin()]
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdmin])
+    def approve(self, request, pk=None):
+        reg_request = self.get_object()
+        if reg_request.status != 'PENDING':
+            return Response({'error': 'Этот запрос уже обработан'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if User.objects.filter(username=reg_request.username).exists():
+            return Response({'error': 'Пользователь с таким логином уже существует'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create user
+        # Split full_name into first/last name if possible for standard Django fields
+        name_parts = reg_request.full_name.split()
+        first_name = name_parts[0] if len(name_parts) > 0 else ""
+        last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+
+        user = User.objects.create(
+            username=reg_request.username,
+            first_name=first_name,
+            last_name=last_name,
+            full_name=reg_request.full_name,
+            institute=reg_request.institute,
+            position=reg_request.position,
+            role='teacher',
+            plain_password=reg_request.plain_password
+        )
+        user.password = reg_request.password # It's already hashed
+        user.save()
+        
+        reg_request.status = 'APPROVED'
+        reg_request.save()
+        
+        return Response({'status': 'approved', 'user_id': user.id})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdmin])
+    def reject(self, request, pk=None):
+        reg_request = self.get_object()
+        if reg_request.status != 'PENDING':
+            return Response({'error': 'Этот запрос уже обработан'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        reg_request.status = 'REJECTED'
+        reg_request.save()
+        return Response({'status': 'rejected'})

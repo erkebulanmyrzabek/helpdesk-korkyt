@@ -9,6 +9,11 @@ const corpuses = ref([])
 const helpdesks = ref([])
 const isLoading = ref(false)
 
+const notifications = ref({
+    new_requests: 0,
+    new_feedbacks: 0
+})
+
 const filters = ref({
     date_from: '',
     date_to: '',
@@ -37,6 +42,15 @@ const fetchHelpdesks = async () => {
         const response = await axios.get('users/')
         helpdesks.value = response.data.filter(u => u.role === 'helpdesk')
     } catch (e) { console.error(e) }
+}
+
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get('admin/notifications/summary/')
+        notifications.value = response.data
+    } catch (error) {
+        console.error('Error fetching notifications:', error)
+    }
 }
 
 const fetchReport = async () => {
@@ -146,6 +160,7 @@ const formatDate = (dateString) => {
 onMounted(() => {
     fetchCorpuses()
     fetchHelpdesks()
+    fetchNotifications()
     fetchReport()
 })
 
@@ -158,7 +173,10 @@ watch(() => filters.value, () => {
 
 <template>
     <div class="container-fluid pb-5">
-        <AdminSubNav />
+        <AdminSubNav 
+            :newRequests="notifications.new_requests" 
+            :newFeedbacks="notifications.new_feedbacks"
+        />
 
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white border-bottom fw-bold text-muted">

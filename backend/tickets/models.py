@@ -23,6 +23,9 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='teacher')
     plain_password = models.CharField("Пароль (raw)", max_length=255, null=True, blank=True)
     rating = models.FloatField("Рейтинг", default=0.0)
+    institute = models.CharField("Институт / подразделение", max_length=255, null=True, blank=True)
+    position = models.CharField("Должность", max_length=255, null=True, blank=True)
+    full_name = models.CharField("ФИО", max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
@@ -48,7 +51,8 @@ class Ticket(models.Model):
     
     status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='NEW')
     
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tickets', verbose_name="Автор")
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_tickets', verbose_name="Автор")
+    author_name_display = models.CharField("Имя автора (отображение)", max_length=255, null=True, blank=True)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets', verbose_name="Исполнитель")
     
     # Report by Helpdesk
@@ -77,10 +81,11 @@ class Ticket(models.Model):
 
 class Feedback(models.Model):
     ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE, related_name='feedback', verbose_name="Заявка")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='feedbacks', verbose_name="Пользователь")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='feedbacks', verbose_name="Пользователь")
     rating = models.IntegerField("Оценка", choices=[(i, i) for i in range(1, 6)])
     comment = models.TextField("Комментарий", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_viewed_by_admin = models.BooleanField("Просмотрен администратором", default=False)
 
     class Meta:
         verbose_name = "Отзыв"
@@ -106,3 +111,39 @@ class SystemSetting(models.Model):
 
     def __str__(self):
         return "Настройки системы"
+
+class RegistrationRequest(models.Model):
+    INSTITUTE_CHOICES = (
+        ('Ректорат', 'Ректорат'),
+        ('Институт педагогики и традиционного искусства', 'Институт педагогики и традиционного искусства'),
+        ('Институт естествознания', 'Институт естествознания'),
+        ('Инженерно-технологический институт', 'Инженерно-технологический институт'),
+        ('Институт экономики и права', 'Институт экономики и права'),
+        ('Гуманитарно-педагогический институт', 'Гуманитарно-педагогический институт'),
+        ('Институт искусственного интеллекта', 'Институт искусственного интеллекта'),
+    )
+
+    STATUS_CHOICES = (
+        ('PENDING', 'Ожидает решения'),
+        ('APPROVED', 'Одобрено'),
+        ('REJECTED', 'Отклонено'),
+    )
+
+    full_name = models.CharField("Фамилия и имя", max_length=255)
+    username = models.CharField("Имя пользователя (Login)", max_length=150, unique=True)
+    password = models.CharField("Хэш пароля", max_length=128) # Same length as Django default
+    institute = models.CharField("Институт / подразделение", max_length=255, choices=INSTITUTE_CHOICES)
+    position = models.CharField("Должность", max_length=255)
+    plain_password = models.CharField("Пароль (raw)", max_length=255, null=True, blank=True)
+    
+    status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_viewed_by_admin = models.BooleanField("Просмотрен администратором", default=False)
+
+    class Meta:
+        verbose_name = "Запрос на регистрацию"
+        verbose_name_plural = "Запросы на регистрацию"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.full_name} ({self.username}) - {self.get_status_display()}"

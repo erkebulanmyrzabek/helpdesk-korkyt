@@ -14,6 +14,9 @@ const reportData = ref({
 
 const currentTime = ref(new Date())
 
+const selectedAuthor = ref(null)
+const isLoadingAuthor = ref(false)
+
 const fetchTickets = async () => {
     try {
         const response = await axios.get('tickets/')
@@ -115,6 +118,33 @@ const submitReport = async () => {
     }
 }
 
+const getRoleLabel = (role) => {
+    switch(role) {
+        case 'teacher': return 'Учитель';
+        case 'helpdesk': return 'Хелпдеск';
+        case 'admin': return 'Администратор';
+        default: return role;
+    }
+}
+
+const viewAuthorDetails = async (userId) => {
+    if (!userId) return
+    isLoadingAuthor.value = true
+    try {
+        const response = await axios.get(`users/${userId}/details/`)
+        selectedAuthor.value = response.data
+    } catch (error) {
+        alert('Ошибка при загрузке данных автора')
+        console.error(error)
+    } finally {
+        isLoadingAuthor.value = false
+    }
+}
+
+const closeAuthorModal = () => {
+    selectedAuthor.value = null
+}
+
 onMounted(() => {
     fetchTickets()
 })
@@ -146,8 +176,11 @@ onMounted(() => {
                         <div v-else class="list-group list-group-flush">
                             <div v-for="ticket in openTickets" :key="ticket.id" class="list-group-item p-3" :class="{'bg-danger bg-opacity-10': ticket.is_overdue}">
                                 <div class="d-flex w-100 justify-content-between mb-2">
-                                    <h6 class="mb-1 fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
+                                <h6 class="mb-1 fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
                                     <span v-if="ticket.is_overdue" class="badge bg-danger">ПРОСРОЧЕНО</span>
+                                </div>
+                                <div class="small fw-bold text-primary mb-1 author-link" @click="viewAuthorDetails(ticket.author)" style="cursor: pointer;">
+                                    <i class="bi bi-person"></i> {{ ticket.author_full_name || ticket.author_username }}
                                 </div>
                                 <p class="mb-2 text-secondary small">{{ ticket.description }}</p>
                                 <div class="small text-muted mb-2">
@@ -176,6 +209,9 @@ onMounted(() => {
                     <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-for="ticket in myTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="fw-bold">#{{ ticket.id }} {{ ticket.title }}</h6>
+                            <div class="small text-primary fw-bold mb-1 author-link" @click="viewAuthorDetails(ticket.author)" style="cursor: pointer;">
+                                <i class="bi bi-person"></i> {{ ticket.author_full_name || ticket.author_username }}
+                            </div>
                             <div class="small text-muted mb-2">
                                 {{ ticket.building }}, {{ ticket.room }} 
                                 <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
@@ -225,6 +261,9 @@ onMounted(() => {
                     <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
                         <div v-for="ticket in completedTickets" :key="ticket.id" class="list-group-item p-3">
                             <h6 class="text-muted text-decoration-line-through">#{{ ticket.id }} {{ ticket.title }}</h6>
+                            <div class="small text-muted mb-1 author-link" @click="viewAuthorDetails(ticket.author)" style="cursor: pointer;">
+                                <i class="bi bi-person"></i> {{ ticket.author_full_name || ticket.author_username }}
+                            </div>
                             <span :class="getStatusBadgeClass(ticket.status) + ' mb-2'">{{ getStatusText(ticket.status) }}</span>
                             
                             <div v-if="ticket.feedback" class="p-2 rounded" style="background-color: #e9ecef;">
@@ -241,5 +280,65 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+
+        <!-- AUTHOR INFO MODAL -->
+        <div v-if="selectedAuthor" class="modal-backdrop fade show"></div>
+        <div v-if="selectedAuthor" class="modal fade show d-block" tabindex="-1" @click.self="closeAuthorModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-light border-bottom-0 pb-0">
+                        <button type="button" class="btn-close" @click="closeAuthorModal"></button>
+                    </div>
+                    <div class="modal-body pt-0 text-center">
+                        <div class="author-avatar mb-3 d-inline-block">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px; font-size: 2rem;">
+                                {{ selectedAuthor.full_name ? selectedAuthor.full_name[0] : selectedAuthor.username[0].toUpperCase() }}
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-1">{{ selectedAuthor.full_name || 'Не указано' }}</h4>
+                        <code class="text-primary mb-4 d-block fs-5">@{{ selectedAuthor.username }}</code>
+
+                        <div class="row g-3 text-start">
+                            <div class="col-12 p-3 bg-light rounded-3 mb-2">
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Институт</small>
+                                        <div class="fw-bold">{{ selectedAuthor.institute || '-' }}</div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Должность</small>
+                                        <div class="fw-bold">{{ selectedAuthor.position || '-' }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Роль</small>
+                                        <span class="badge bg-secondary">{{ getRoleLabel(selectedAuthor.role) }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Регистрация</small>
+                                        <div class="fw-bold small">{{ selectedAuthor.date_joined ? new Date(selectedAuthor.date_joined).toLocaleDateString() : '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-outline-secondary w-100 mt-3" @click="closeAuthorModal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="isLoadingAuthor" class="modal-backdrop fade show d-flex align-items-center justify-content-center" style="z-index: 2000;">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+.author-link:hover {
+    text-decoration: underline !important;
+    opacity: 0.8;
+}
+</style>

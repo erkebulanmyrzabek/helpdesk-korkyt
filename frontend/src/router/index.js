@@ -6,6 +6,7 @@ import AdminDashboard from '../views/AdminDashboard.vue'
 import AdminReviews from '../views/AdminReviews.vue'
 import AdminSettings from '../views/AdminSettings.vue'
 import AdminReports from '../views/AdminReports.vue'
+import RegisterView from '../views/RegisterView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const router = createRouter({
@@ -19,6 +20,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
     },
     {
       path: '/teacher',
