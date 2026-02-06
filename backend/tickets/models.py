@@ -68,6 +68,9 @@ class Ticket(models.Model):
     completed_at = models.DateTimeField("Время завершения", null=True, blank=True)
     
     is_overdue = models.BooleanField("Просрочена", default=False)
+    
+    # Feature: User can hide ticket
+    hidden_at_by_author = models.DateTimeField("Скрыто пользователем", null=True, blank=True)
 
     def __str__(self):
         return f"#{self.id} - {self.title} ({self.get_status_display()})"

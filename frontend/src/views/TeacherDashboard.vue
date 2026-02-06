@@ -154,6 +154,16 @@ const cancelTicket = async (id) => {
     }
 }
 
+const hideTicket = async (id) => {
+    if (!confirm('Удалить из списка? (Заявка вернется при обновлении)')) return
+    try {
+        await axios.post(`tickets/${id}/hide/`)
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при скрытии заявки')
+    }
+}
+
 const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
@@ -311,7 +321,7 @@ onUnmounted(() => {
         </div>
         <div class="col-md-8">
             <h3 class="mb-4 text-primary"><i class="bi bi-list-task me-2"></i>Мои заявки</h3>
-            <div class="list-group shadow-sm rounded-3 overflow-hidden">
+            <div class="list-group shadow-sm rounded-3 scrollable-tickets">
                 <div v-if="tickets.length === 0" class="list-group-item text-center py-5 text-muted">
                     <i class="bi bi-inbox display-4 mb-3 d-block"></i>
                     У вас пока нет заявок
@@ -319,7 +329,12 @@ onUnmounted(() => {
                 <div v-for="ticket in tickets" :key="ticket.id" class="list-group-item p-4 border-start-0 border-end-0">
                     <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                         <h5 class="mb-1 fw-bold text-dark">{{ ticket.title }}</h5>
-                        <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
+                        <div class="d-flex align-items-center">
+                            <span :class="getStatusBadgeClass(ticket.status)" class="me-2">{{ getStatusText(ticket.status) }}</span>
+                            <button class="btn btn-sm btn-link text-danger p-0" style="opacity: 0.6;" @click="hideTicket(ticket.id)" title="Удалить из списка (временно)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <p class="mb-2 text-secondary">{{ ticket.description }}</p>
                      <div v-if="ticket.status === 'WAITING_FOR_PARTS' && ticket.parts_wait_reason" class="alert alert-info py-2 px-3 mb-2 small">
@@ -443,6 +458,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.scrollable-tickets {
+    height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .upload-zone {
     border: 2px dashed #dee2e6;
     border-radius: 8px;

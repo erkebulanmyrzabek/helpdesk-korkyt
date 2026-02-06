@@ -10,7 +10,7 @@ from .serializers import (
     TicketSerializer, UserSerializer, CorpusSerializer, 
     FeedbackSerializer, SystemSettingSerializer, RegistrationRequestSerializer
 )
-from django.db.models import Count, Q, Avg
+from django.db.models import Count, Q, Avg, F
 from django.utils import timezone
 import datetime
 import pytz
@@ -93,7 +93,9 @@ class TicketViewSet(viewsets.ModelViewSet):
         user = self.request.user
         
         if user.role == 'teacher':
-            return Ticket.objects.filter(author=user).order_by('-is_overdue', '-created_at')
+            return Ticket.objects.filter(author=user) \
+                .filter(Q(hidden_at_by_author__isnull=True) | Q(updated_at__gt=F('hidden_at_by_author'))) \
+                .order_by('-updated_at')
         elif user.role in ['admin', 'helpdesk']:
             return self._get_report_queryset(self.request)
             
@@ -238,6 +240,18 @@ class TicketViewSet(viewsets.ModelViewSet):
                  return Response({'error': 'Оценка должна быть от 1 до 5'}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError:
             return Response({'error': 'Некорректный формат оценки'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
+    def hide(self, request, pk=None):
+        ticket = self.get_object()
+        
+        if ticket.author != request.user:
+            return Response({'error': 'Вы не автор этой заявки'}, status=status.HTTP_403_FORBIDDEN)
+            
+        # Use update to avoid triggering auto_now on updated_at
+        Ticket.objects.filter(pk=ticket.pk).update(hidden_at_by_author=timezone.now())
+        
+        return Response({'status': 'hidden'})
 
     @action(detail=False, methods=['get'], permission_classes=[IsAdmin])
     def stats(self, request):
