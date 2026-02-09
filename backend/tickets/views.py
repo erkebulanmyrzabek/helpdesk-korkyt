@@ -5,10 +5,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.conf import settings
-from .models import Ticket, User, Corpus, Feedback, SystemSetting, RegistrationRequest
+from .models import Ticket, User, Corpus, Feedback, SystemSetting, RegistrationRequest, TicketAssistOffer
 from .serializers import (
     TicketSerializer, UserSerializer, CorpusSerializer, 
-    FeedbackSerializer, SystemSettingSerializer, RegistrationRequestSerializer
+    FeedbackSerializer, SystemSettingSerializer, RegistrationRequestSerializer,
+    TicketAssistOfferSerializer
 )
 from django.db.models import Count, Q, Avg, F
 from django.utils import timezone
@@ -241,6 +242,52 @@ class TicketViewSet(viewsets.ModelViewSet):
         except ValueError:
             return Response({'error': 'Некорректный формат оценки'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['post'], permission_classes=[IsHelpdesk], url_path='assist-offers')
+    def send_assist_offer(self, request, pk=None):
+        ticket = self.get_object()
+        
+        # 1. Only the main performer can send offers
+        if ticket.assigned_to != request.user:
+            return Response({'error': 'Только основной исполнитель может приглашать помощников'}, status=status.HTTP_403_FORBIDDEN)
+            
+        # 2. Check ticket status
+        if ticket.status not in ['IN_PROGRESS', 'WAITING_FOR_PARTS']:
+            return Response({'error': 'Пригласить помощника можно только для заявок в работе'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        to_helpdesk_id = request.data.get('to_helpdesk_id')
+        if not to_helpdesk_id:
+            return Response({'error': 'Не указан ID помощника'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            to_helpdesk = User.objects.get(id=to_helpdesk_id, role='helpdesk')
+        except User.DoesNotExist:
+            return Response({'error': 'Помощник не найден или не является хелпдеском'}, status=status.HTTP_404_NOT_FOUND)
+            
+        # 3. Cannot send to self
+        if to_helpdesk == request.user:
+            return Response({'error': 'Нельзя отправить предложение самому себе'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 4. Cannot send to current assistants
+        if ticket.assistants.filter(id=to_helpdesk.id).exists():
+            return Response({'error': 'Этот пользователь уже является помощником по данной заявке'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # 5. Check if we already have an assistant or a pending offer
+        if ticket.assistants.count() >= 1:
+             return Response({'error': 'К заявке уже прикреплен помощник. Максимум 2 исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+             
+        if TicketAssistOffer.objects.filter(ticket=ticket, status='PENDING').exists():
+            return Response({'error': 'У этой заявки уже есть активное предложение о помощи'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Create offer
+        offer = TicketAssistOffer.objects.create(
+            ticket=ticket,
+            from_helpdesk=request.user,
+            to_helpdesk=to_helpdesk,
+            status='PENDING'
+        )
+        
+        return Response(TicketAssistOfferSerializer(offer).data, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
     def hide(self, request, pk=None):
         ticket = self.get_object()
@@ -258,20 +305,38 @@ class TicketViewSet(viewsets.ModelViewSet):
         total = Ticket.objects.count()
         by_status = Ticket.objects.values('status').annotate(count=Count('status'))
         
-        # Stats by Helpdesk
-        helpdesk_stats = User.objects.filter(role='helpdesk').annotate(
-            total_tickets=Count('assigned_tickets', filter=Q(assigned_tickets__status='CLOSED')),
-            avg_rating=Avg('assigned_tickets__feedback__rating')
-        ).values('id', 'username', 'first_name', 'last_name', 'total_tickets', 'avg_rating', 'rating')
+        # Stats by Helpdesk (Main + Assisted)
+        helpdesks = User.objects.filter(role='helpdesk')
+        helpdesk_stats_list = []
+        
+        for hd in helpdesks:
+            # Count where they are the main performer
+            main_count = Ticket.objects.filter(assigned_to=hd, status='CLOSED').count()
+            # Count where they are the assistant
+            asst_count = Ticket.objects.filter(assistants=hd, status='CLOSED').count()
+            
+            # Average rating (only from tickets where they were main performer usually, 
+            # or from Feedback model which has user FK)
+            avg_rating = Feedback.objects.filter(user=hd).aggregate(Avg('rating'))['rating__avg']
+            
+            helpdesk_stats_list.append({
+                'id': hd.id,
+                'username': hd.username,
+                'first_name': hd.first_name,
+                'last_name': hd.last_name,
+                'total_tickets': main_count + asst_count,
+                'avg_rating': avg_rating,
+                'rating': hd.rating
+            })
         
         # New Metrics
-        total_helpers = User.objects.filter(role='helpdesk').count()
+        total_helpers = helpdesks.count()
         overdue_count = Ticket.objects.filter(is_overdue=True).exclude(status='CLOSED').count()
 
         return Response({
             'total': total,
             'by_status': by_status,
-            'helpdesk_stats': list(helpdesk_stats),
+            'helpdesk_stats': helpdesk_stats_list,
             'total_helpers': total_helpers,
             'overdue_count': overdue_count
         })
@@ -294,7 +359,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         if building:
             queryset = queryset.filter(building=building)
         if helper_id:
-            queryset = queryset.filter(assigned_to_id=helper_id)
+            queryset = queryset.filter(Q(assigned_to_id=helper_id) | Q(assistants__id=helper_id)).distinct()
             
         return queryset
 
@@ -315,7 +380,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         # Headers
         headers = [
             'ID', 'Дата создания', 'Статус', 'Автор (ФИО/Email)', 
-            'Здание', 'Кабинет', 'Описание', 'Исполнитель', 
+            'Здание', 'Кабинет', 'Описание', 'Исполнитель', 'Помощники',
             'Дата закрытия'
         ]
         ws.append(headers)
@@ -335,6 +400,9 @@ class TicketViewSet(viewsets.ModelViewSet):
             if not author_info and ticket.author.email:
                 author_info = ticket.author.email
             
+            # Assistants string
+            assistants = ", ".join([a.full_name or a.username for a in ticket.assistants.all()])
+
             row = [
                 ticket.id,
                 created_at,
@@ -344,6 +412,7 @@ class TicketViewSet(viewsets.ModelViewSet):
                 ticket.room,
                 ticket.description,
                 ticket.assigned_to.get_full_name() or ticket.assigned_to.username if ticket.assigned_to else '-',
+                assistants or '-',
                 completed_at or '-',
             ]
             ws.append(row)
@@ -369,22 +438,38 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[IsAdmin])
     def export_pdf_stats(self, request):
-        queryset = self._get_report_queryset(request).filter(status='CLOSED', assigned_to__isnull=False)
+        queryset = self._get_report_queryset(request).filter(status='CLOSED')
         
-        # Aggregate statistics
-        stats = queryset.values('assigned_to__first_name', 'assigned_to__last_name', 'assigned_to__username').annotate(count=Count('id')).order_by('-count')
+        # Manual aggregation for multiple helpdesks
+        helpdesk_counts = {} # user_id -> {'name': str, 'count': int}
         
-        if not stats:
+        for ticket in queryset:
+            # Main performer
+            if ticket.assigned_to:
+                uid = ticket.assigned_to.id
+                if uid not in helpdesk_counts:
+                    name = f"{ticket.assigned_to.first_name} {ticket.assigned_to.last_name}".strip() or ticket.assigned_to.username
+                    helpdesk_counts[uid] = {'name': name, 'count': 0}
+                helpdesk_counts[uid]['count'] += 1
+            
+            # Assistants
+            for asst in ticket.assistants.all():
+                uid = asst.id
+                if uid not in helpdesk_counts:
+                    name = f"{asst.first_name} {asst.last_name}".strip() or asst.username
+                    helpdesk_counts[uid] = {'name': name, 'count': 0}
+                helpdesk_counts[uid]['count'] += 1
+        
+        if not helpdesk_counts:
             return Response({'error': 'Нет данных для формирования отчета за этот период'}, status=status.HTTP_400_BAD_REQUEST)
         
-        total_closed = sum(s['count'] for s in stats)
+        # Sort by count desc
+        sorted_hd = sorted(helpdesk_counts.values(), key=lambda x: x['count'], reverse=True)
         
-        labels = []
-        sizes = []
-        for s in stats:
-            name = f"{s['assigned_to__first_name']} {s['assigned_to__last_name']}".strip() or s['assigned_to__username']
-            labels.append(name)
-            sizes.append(s['count'])
+        total_closed = sum(s['count'] for s in sorted_hd)
+        
+        labels = [s['name'] for s in sorted_hd]
+        sizes = [s['count'] for s in sorted_hd]
 
         # Prepare period string for report
         date_from = request.query_params.get('date_from')
@@ -509,7 +594,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.IsAuthenticated(), IsAdmin()]
-        if self.action in ['list', 'destroy']:
+        if self.action == 'list':
+             return [permissions.IsAuthenticated(), IsAdminOrHelpdesk()]
+        if self.action == 'destroy':
              return [permissions.IsAuthenticated(), IsAdmin()]
         if self.action == 'details':
              return [permissions.IsAuthenticated(), IsAdminOrHelpdesk()]
@@ -600,3 +687,79 @@ class RegistrationRequestViewSet(viewsets.ModelViewSet):
         reg_request.status = 'REJECTED'
         reg_request.save()
         return Response({'status': 'rejected'})
+
+class TicketAssistOfferViewSet(viewsets.ModelViewSet):
+    queryset = TicketAssistOffer.objects.all()
+    serializer_class = TicketAssistOfferSerializer
+    permission_classes = [permissions.IsAuthenticated, IsHelpdesk]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = TicketAssistOffer.objects.filter(to_helpdesk=user)
+        
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
+        return queryset.order_by('-created_at')
+
+    def perform_create(self, serializer):
+        # We handle creation via TicketViewSet action for better URL structure
+        pass
+
+    @action(detail=True, methods=['post'])
+    def accept(self, request, pk=None):
+        offer = self.get_object()
+        
+        if offer.to_helpdesk != request.user:
+            return Response({'error': 'Это не ваше предложение'}, status=status.HTTP_403_FORBIDDEN)
+            
+        if offer.status != 'PENDING':
+            return Response({'error': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        ticket = offer.ticket
+        if ticket.status in ['CLOSED', 'CANCELED']:
+            return Response({'error': 'Заявка уже закрыта или отменена'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update offer
+        offer.status = 'ACCEPTED'
+        offer.responded_at = timezone.now()
+        offer.save()
+
+        # Add assistant to ticket
+        ticket.assistants.add(request.user)
+        ticket.save()
+
+        return Response({'status': 'accepted'})
+
+    @action(detail=True, methods=['post'])
+    def decline(self, request, pk=None):
+        offer = self.get_object()
+        
+        if offer.to_helpdesk != request.user:
+            return Response({'error': 'Это не ваше предложение'}, status=status.HTTP_403_FORBIDDEN)
+            
+        if offer.status != 'PENDING':
+            return Response({'error': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
+
+        offer.status = 'DECLINED'
+        offer.responded_at = timezone.now()
+        offer.save()
+
+        return Response({'status': 'declined'})
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        offer = self.get_object()
+        
+        if offer.from_helpdesk != request.user:
+            return Response({'error': 'Вы не автор этого предложения'}, status=status.HTTP_403_FORBIDDEN)
+            
+        if offer.status != 'PENDING':
+            return Response({'error': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
+
+        offer.status = 'CANCELED'
+        offer.responded_at = timezone.now()
+        offer.save()
+
+        return Response({'status': 'canceled'})

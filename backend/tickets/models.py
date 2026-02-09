@@ -72,6 +72,9 @@ class Ticket(models.Model):
     # Feature: User can hide ticket
     hidden_at_by_author = models.DateTimeField("Скрыто пользователем", null=True, blank=True)
 
+    # New: Multiple performers support
+    assistants = models.ManyToManyField(User, blank=True, related_name='assisted_tickets', verbose_name="Помощники")
+
     def __str__(self):
         return f"#{self.id} - {self.title} ({self.get_status_display()})"
     
@@ -81,6 +84,31 @@ class Ticket(models.Model):
             delta = self.completed_at - self.taken_at
             return int(delta.total_seconds() / 60)
         return None
+
+class TicketAssistOffer(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Ожидает'),
+        ('ACCEPTED', 'Принято'),
+        ('DECLINED', 'Отклонено'),
+        ('CANCELED', 'Отменено'),
+    )
+
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='assist_offers', verbose_name="Заявка")
+    from_helpdesk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_assist_offers', verbose_name="Отправитель")
+    to_helpdesk = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_assist_offers', verbose_name="Получатель")
+    
+    status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField("Дата ответа", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Предложение помощи"
+        verbose_name_plural = "Предложения помощи"
+        unique_together = ('ticket', 'to_helpdesk', 'status') # Should be careful with status=PENDING
+
+    def __str__(self):
+        return f"Offer for Ticket #{self.ticket.id} from {self.from_helpdesk.username} to {self.to_helpdesk.username}"
 
 class Feedback(models.Model):
     ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE, related_name='feedback', verbose_name="Заявка")

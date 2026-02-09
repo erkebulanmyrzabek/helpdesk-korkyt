@@ -352,8 +352,16 @@ onUnmounted(() => {
                          </a>
                     </div>
                     
-                    <div v-if="ticket.assigned_to_username" class="alert alert-light border-0 bg-light p-2 d-inline-block mb-0">
+                    <div v-if="ticket.assigned_to_username" class="alert alert-light border-0 bg-light p-2 d-inline-block mb-2">
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
+                    </div>
+
+                    <!-- Assistants list -->
+                    <div v-if="ticket.assistants_details && ticket.assistants_details.length > 0" class="mb-2">
+                        <small class="text-muted"><i class="bi bi-people me-1"></i>Помощники: </small>
+                        <span v-for="asst in ticket.assistants_details" :key="asst.id" class="badge bg-light text-dark border me-1">
+                            {{ asst.full_name || asst.username }}
+                        </span>
                     </div>
 
                     <!-- NEW: Cancel Button -->

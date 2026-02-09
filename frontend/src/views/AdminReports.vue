@@ -246,18 +246,19 @@ watch(() => filters.value, () => {
                             <th>Здание / Каб.</th>
                             <th style="max-width: 300px;">Описание</th>
                             <th>Хелпдеск</th>
+                            <th>Помощник</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-if="isLoading">
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="9" class="text-center py-5">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Загрузка...</span>
                                 </div>
                             </td>
                         </tr>
                         <tr v-else-if="tickets.length === 0">
-                            <td colspan="8" class="text-center py-5 text-muted">Заявки не найдены</td>
+                            <td colspan="9" class="text-center py-5 text-muted">Заявки не найдены</td>
                         </tr>
                         <tr v-for="t in tickets" :key="t.id">
                             <td class="fw-bold">#{{ t.id }}</td>
@@ -275,6 +276,12 @@ watch(() => filters.value, () => {
                                 {{ t.description }}
                             </td>
                             <td class="small">{{ t.assigned_to_username || '-' }}</td>
+                            <td class="small">
+                                <template v-if="t.assistants_details && t.assistants_details.length > 0">
+                                    {{ t.assistants_details.map(a => a.full_name || a.username).join(', ') }}
+                                </template>
+                                <template v-else>-</template>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

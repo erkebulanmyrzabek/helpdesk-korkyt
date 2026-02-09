@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     TicketViewSet, UserViewSet, CorpusViewSet, 
     custom_obtain_auth_token, FeedbackViewSet, 
-    SystemSettingViewSet, RegistrationRequestViewSet
+    SystemSettingViewSet, RegistrationRequestViewSet,
+    TicketAssistOfferViewSet
 )
 from .admin_notifications import (
     admin_notifications_summary,
@@ -18,6 +19,7 @@ router.register(r'corpuses', CorpusViewSet, basename='corpus')
 router.register(r'feedbacks', FeedbackViewSet)
 router.register(r'settings', SystemSettingViewSet)
 router.register(r'registration-requests', RegistrationRequestViewSet)
+router.register(r'assist-offers', TicketAssistOfferViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

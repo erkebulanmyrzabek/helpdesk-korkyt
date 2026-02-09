@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Ticket, Corpus, Feedback, SystemSetting, RegistrationRequest
+from .models import User, Ticket, Corpus, Feedback, SystemSetting, RegistrationRequest, TicketAssistOffer
 from django.contrib.auth.hashers import make_password
 import re
 
@@ -71,14 +71,19 @@ class TicketSerializer(serializers.ModelSerializer):
     author_full_name = serializers.SerializerMethodField()
     author_details = UserSerializer(source='author', read_only=True)
     assigned_to_username = serializers.ReadOnlyField(source='assigned_to.username')
+    assistants_details = UserSerializer(source='assistants', many=True, read_only=True)
+    pending_offers = serializers.SerializerMethodField()
     duration_minutes = serializers.SerializerMethodField()
     feedback = FeedbackSerializer(read_only=True)
 
     class Meta:
         model = Ticket
         fields = '__all__'
-        read_only_fields = ('author', 'created_at', 'updated_at', 'taken_at', 'started_at', 'completed_at', 'is_overdue', 'status')
+        read_only_fields = ('author', 'created_at', 'updated_at', 'taken_at', 'started_at', 'completed_at', 'is_overdue', 'status', 'assistants')
     
+    def get_pending_offers(self, obj):
+        return TicketAssistOffer.objects.filter(ticket=obj, status='PENDING').values_list('to_helpdesk_id', flat=True)
+
     def get_duration_minutes(self, obj):
         return obj.get_duration()
 
@@ -91,6 +96,25 @@ class TicketSerializer(serializers.ModelSerializer):
         if obj.author:
             return obj.author.full_name or obj.author.get_full_name() or obj.author.username
         return obj.author_name_display or "Удаленный пользователь"
+
+class TicketAssistOfferSerializer(serializers.ModelSerializer):
+    from_helpdesk_details = UserSerializer(source='from_helpdesk', read_only=True)
+    to_helpdesk_details = UserSerializer(source='to_helpdesk', read_only=True)
+    ticket_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TicketAssistOffer
+        fields = '__all__'
+        read_only_fields = ('from_helpdesk', 'status', 'created_at', 'responded_at')
+
+    def get_ticket_details(self, obj):
+        return {
+            'id': obj.ticket.id,
+            'title': obj.ticket.title,
+            'status': obj.ticket.status,
+            'building': obj.ticket.building,
+            'room': obj.ticket.room
+        }
 
 class SystemSettingSerializer(serializers.ModelSerializer):
     class Meta:

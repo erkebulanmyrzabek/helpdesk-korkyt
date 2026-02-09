@@ -12,6 +12,15 @@ const reportData = ref({
     media_after: null
 })
 
+const assistOffers = ref([])
+const helpdeskUsers = ref([])
+const assistantModal = ref({
+    show: false,
+    ticketId: null,
+    search: '',
+    isLoading: false
+})
+
 const currentTime = ref(new Date())
 
 const selectedAuthor = ref(null)
@@ -26,12 +35,33 @@ const fetchTickets = async () => {
     }
 }
 
+const fetchOffers = async () => {
+    try {
+        const response = await axios.get('assist-offers/?status=PENDING')
+        assistOffers.value = response.data
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+const fetchHelpdeskUsers = async () => {
+    try {
+        const response = await axios.get('users/?role=helpdesk')
+        helpdeskUsers.value = response.data.filter(u => u.role === 'helpdesk')
+    } catch (e) {
+        console.error(e)
+    }
+}
+
 
 
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
 const myTickets = computed(() => {
     if (!authStore.user) return []
-    return tickets.value.filter(t => t.assigned_to === authStore.user.id && (t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS'))
+    return tickets.value.filter(t => 
+        (t.assigned_to === authStore.user.id || (t.assistants && t.assistants.includes(authStore.user.id))) && 
+        (t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS')
+    )
 })
 const completedTickets = computed(() => {
     if (!authStore.user) return []
@@ -141,12 +171,75 @@ const viewAuthorDetails = async (userId) => {
     }
 }
 
+const openAssistantModal = (ticketId) => {
+    assistantModal.value.ticketId = ticketId
+    assistantModal.value.show = true
+    assistantModal.value.search = ''
+    fetchHelpdeskUsers()
+}
+
+const closeAssistantModal = () => {
+    assistantModal.value.show = false
+    assistantModal.value.ticketId = null
+}
+
+const filteredHelpdeskUsers = computed(() => {
+    const search = assistantModal.value.search.toLowerCase()
+    const ticket = tickets.value.find(t => t.id === assistantModal.value.ticketId)
+    if (!ticket) return []
+
+    const currentAssistants = (ticket.assistants || [])
+    const pendingOfferIds = (ticket.pending_offers || [])
+
+    return helpdeskUsers.value.filter(u => {
+        const fullName = (u.full_name || '').toLowerCase()
+        const username = (u.username || '').toLowerCase()
+        const isSelf = u.id === authStore.user.id
+        const isAlreadyAssistant = currentAssistants.includes(u.id)
+        const hasPendingOffer = pendingOfferIds.includes(u.id)
+
+        return (fullName.includes(search) || username.includes(search)) && !isSelf && !isAlreadyAssistant && !hasPendingOffer
+    })
+})
+
+const sendAssistOffer = async (toHelpdeskId) => {
+    try {
+        await axios.post(`tickets/${assistantModal.value.ticketId}/assist-offers/`, {
+            to_helpdesk_id: toHelpdeskId
+        })
+        alert('Предложение отправлено')
+        closeAssistantModal()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при отправке предложения')
+    }
+}
+
+const acceptOffer = async (offerId) => {
+    try {
+        await axios.post(`assist-offers/${offerId}/accept/`)
+        fetchOffers()
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка')
+    }
+}
+
+const declineOffer = async (offerId) => {
+    try {
+        await axios.post(`assist-offers/${offerId}/decline/`)
+        fetchOffers()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка')
+    }
+}
+
 const closeAuthorModal = () => {
     selectedAuthor.value = null
 }
 
 onMounted(() => {
     fetchTickets()
+    fetchOffers()
 })
 
 
@@ -161,9 +254,9 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="row">
+        <div class="row g-3">
             <!-- New Tickets -->
-            <div class="col-md-4">
+            <div class="col-xl-3 col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white text-primary border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Новые заявки</h5>
@@ -200,7 +293,7 @@ onMounted(() => {
             </div>
 
             <!-- My Active Tickets -->
-            <div class="col-md-4">
+            <div class="col-xl-3 col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-warning text-dark border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">В работе</h5>
@@ -221,12 +314,25 @@ onMounted(() => {
                             <!-- Actions -->
                             <div class="d-flex gap-2 mt-2 flex-wrap">
 
-                                <button v-if="ticket.status !== 'WAITING_FOR_PARTS'" class="btn btn-sm btn-dark" @click="needPartsData.id = ticket.id">
+                                <button v-if="ticket.status !== 'WAITING_FOR_PARTS' && ticket.assigned_to === authStore.user.id" class="btn btn-sm btn-dark" @click="needPartsData.id = ticket.id">
                                     ⏳ Требуется запчасть
+                                </button>
+                                <button v-if="ticket.assigned_to === authStore.user.id && (!ticket.assistants_details || ticket.assistants_details.length === 0) && (!ticket.pending_offers || ticket.pending_offers.length === 0)" class="btn btn-sm btn-outline-primary" @click="openAssistantModal(ticket.id)">
+                                    ➕ Добавить помощника
                                 </button>
                                 <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
+                            </div>
+
+                            <!-- Assistants list -->
+                            <div v-if="ticket.assistants_details && ticket.assistants_details.length > 0" class="mt-2">
+                                <small class="text-muted d-block mb-1">Помощники:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span v-for="asst in ticket.assistants_details" :key="asst.id" class="badge bg-light text-dark border">
+                                        {{ asst.full_name || asst.username }}
+                                    </span>
+                                </div>
                             </div>
 
 
@@ -252,8 +358,40 @@ onMounted(() => {
                 </div>
             </div>
 
+            <!-- Offers -->
+            <div class="col-xl-3 col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-info text-dark border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Предложения</h5>
+                        <span class="badge bg-dark text-white rounded-pill">{{ assistOffers.length }}</span>
+                    </div>
+                    <div class="card-body p-0" style="max-height: 70vh; overflow-y: auto;">
+                        <div v-if="assistOffers.length === 0" class="text-center py-5 text-muted">
+                            Нет предложений
+                        </div>
+                        <div v-else class="list-group list-group-flush">
+                            <div v-for="offer in assistOffers" :key="offer.id" class="list-group-item p-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <h6 class="fw-bold mb-0">#{{ offer.ticket_details.id }} {{ offer.ticket_details.title }}</h6>
+                                </div>
+                                <div class="small text-muted mb-2">
+                                    От: <span class="fw-bold text-primary">{{ offer.from_helpdesk_details.full_name || offer.from_helpdesk_details.username }}</span>
+                                </div>
+                                <div class="small text-muted mb-2">
+                                    {{ offer.ticket_details.building }}, {{ offer.ticket_details.room }}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-success flex-grow-1" @click="acceptOffer(offer.id)">Принять</button>
+                                    <button class="btn btn-sm btn-outline-danger flex-grow-1" @click="declineOffer(offer.id)">Отклонить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Closed -->
-            <div class="col-md-4">
+            <div class="col-xl-3 col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-success text-white border-bottom">
                         <h5 class="mb-0">История</h5>
@@ -276,6 +414,39 @@ onMounted(() => {
                                 <p class="mb-0 small text-dark fst-italic">"{{ ticket.feedback.comment || 'Без комментария' }}"</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASSISTANT SELECTION MODAL -->
+        <div v-if="assistantModal.show" class="modal-backdrop fade show"></div>
+        <div v-if="assistantModal.show" class="modal fade show d-block" tabindex="-1" @click.self="closeAssistantModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Выберите помощника</h5>
+                        <button type="button" class="btn-close" @click="closeAssistantModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <input v-model="assistantModal.search" type="text" class="form-control" placeholder="Поиск по имени или логину...">
+                        </div>
+                        <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                            <div v-for="user in filteredHelpdeskUsers" :key="user.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold">{{ user.full_name }}</div>
+                                    <small class="text-muted">@{{ user.username }}</small>
+                                </div>
+                                <button class="btn btn-sm btn-primary" @click="sendAssistOffer(user.id)">Пригласить</button>
+                            </div>
+                            <div v-if="filteredHelpdeskUsers.length === 0" class="text-center py-3 text-muted">
+                                Помощники не найдены
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeAssistantModal">Закрыть</button>
                     </div>
                 </div>
             </div>
