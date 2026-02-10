@@ -6,9 +6,7 @@ class Command(BaseCommand):
     help = 'Checks for overdue tickets'
 
     def handle(self, *args, **kwargs):
-        now = timezone.now()
         overdue_tickets = Ticket.objects.filter(
-            deadline__lt=now,
             is_overdue=False
         ).exclude(status__in=['CLOSED', 'UNFIXABLE'])
 

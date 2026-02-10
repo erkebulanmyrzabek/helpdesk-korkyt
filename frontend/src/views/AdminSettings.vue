@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from '../axios'
+import AdminSubNav from '../components/AdminSubNav.vue'
 
 // Tabs
 const currentTab = ref('worktime') // 'worktime', 'buildings'
@@ -19,6 +20,11 @@ const corpuses = ref([])
 const isLoadingCorpuses = ref(false)
 const showCorpusModal = ref(false)
 const editingCorpus = ref({ id: null, name: '' })
+
+const notifications = ref({
+    new_requests: 0,
+    new_feedbacks: 0
+})
 
 const fetchSettings = async () => {
     try {
@@ -41,6 +47,15 @@ const saveSettings = async () => {
         alert('Ошибка при сохранении настроек')
     } finally {
         isLoadingSettings.value = false
+    }
+}
+
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get('admin/notifications/summary/')
+        notifications.value = response.data
+    } catch (error) {
+        console.error('Error fetching notifications:', error)
     }
 }
 
@@ -94,27 +109,16 @@ const deleteCorpus = async (corpus) => {
 onMounted(() => {
     fetchSettings()
     fetchCorpuses()
+    fetchNotifications()
 })
 </script>
 
 <template>
-    <div class="container-fluid py-4 min-vh-100 bg-light-subtle">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><router-link to="/admin">Администрирование</router-link></li>
-                        <li class="breadcrumb-item active">Настройки</li>
-                    </ol>
-                </nav>
-                <h2 class="text-primary fw-bold mb-0">
-                    <i class="bi bi-gear-wide-connected me-2"></i>Настройки системы
-                </h2>
-            </div>
-            <router-link to="/admin" class="btn btn-outline-secondary rounded-pill px-4">
-                <i class="bi bi-arrow-left me-1"></i>Назад
-            </router-link>
-        </div>
+    <div class="container-fluid pb-5 bg-light-subtle">
+        <AdminSubNav 
+            :newRequests="notifications.new_requests" 
+            :newFeedbacks="notifications.new_feedbacks"
+        />
 
         <div class="row">
             <!-- Sidebar Navigation -->

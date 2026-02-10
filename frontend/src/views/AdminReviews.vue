@@ -1,16 +1,42 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from '../axios'
+import AdminSubNav from '../components/AdminSubNav.vue'
 
 const feedbacks = ref([])
 const helperFilter = ref('')
+
+const notifications = ref({
+    new_requests: 0,
+    new_feedbacks: 0
+})
 
 const fetchFeedbacks = async () => {
     try {
         const response = await axios.get('feedbacks/')
         feedbacks.value = response.data
+        // Mark as viewed when admin opens this page
+        await markFeedbacksViewed()
     } catch (error) {
         console.error(error)
+    }
+}
+
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get('admin/notifications/summary/')
+        notifications.value = response.data
+    } catch (error) {
+        console.error('Error fetching notifications:', error)
+    }
+}
+
+const markFeedbacksViewed = async () => {
+    try {
+        await axios.post('admin/notifications/mark-feedbacks-viewed/')
+        notifications.value.new_feedbacks = 0
+    } catch (error) {
+        console.error('Error marking feedbacks as viewed:', error)
     }
 }
 
@@ -45,22 +71,25 @@ const formatDate = (dateString) => {
 }
 
 onMounted(() => {
+    fetchNotifications()
     fetchFeedbacks()
 })
 </script>
 
 <template>
-    <div class="container-fluid">
+    <div class="container-fluid pb-5">
+        <AdminSubNav 
+            :newRequests="notifications.new_requests" 
+            :newFeedbacks="notifications.new_feedbacks"
+        />
+
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary mb-0"><i class="bi bi-star me-2"></i>Все отзывы</h2>
+            <h4 class="text-muted mb-0"><i class="bi bi-star me-2"></i>Отзывы пользователей</h4>
             <div class="d-flex gap-3 align-items-center">
                 <select v-model="helperFilter" class="form-select form-select-sm" style="width: 200px;">
                     <option value="">Все хелперы</option>
                     <option v-for="helper in uniqueHelpers" :key="helper" :value="helper">{{ helper }}</option>
                 </select>
-                <router-link to="/admin" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Назад
-                </router-link>
             </div>
         </div>
 

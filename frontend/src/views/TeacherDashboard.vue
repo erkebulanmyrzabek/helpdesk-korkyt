@@ -144,13 +144,34 @@ const submitRating = async () => {
     }
 }
 
+const cancelTicket = async (id) => {
+    if (!confirm('Вы уверены, что хотите отменить заявку?')) return
+    try {
+        await axios.post(`tickets/${id}/cancel/`)
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при отмене заявки')
+    }
+}
+
+const hideTicket = async (id) => {
+    if (!confirm('Удалить из списка? (Заявка вернется при обновлении)')) return
+    try {
+        await axios.post(`tickets/${id}/hide/`)
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при скрытии заявки')
+    }
+}
+
 const getStatusBadgeClass = (status) => {
     switch(status) {
         case 'NEW': return 'badge bg-success';
         case 'IN_PROGRESS': return 'badge bg-warning text-dark';
+        case 'WAITING_FOR_PARTS': return 'badge bg-info text-dark';
         case 'WAITING_APPROVE': return 'badge bg-primary';
         case 'CLOSED': return 'badge bg-secondary';
-        case 'UNFIXABLE': return 'badge bg-danger';
+        case 'CANCELED': return 'badge bg-dark';
         default: return 'badge bg-light text-dark';
     }
 }
@@ -159,9 +180,10 @@ const getStatusText = (status) => {
     const map = {
         'NEW': 'Новая',
         'IN_PROGRESS': 'В работе',
+        'WAITING_FOR_PARTS': 'Ожидается запчасть',
         'WAITING_APPROVE': 'Ожидает подтверждения',
         'CLOSED': 'Закрыта',
-        'UNFIXABLE': 'Неисправима'
+        'CANCELED': 'Отменена'
     }
     return map[status] || status
 }
@@ -299,7 +321,7 @@ onUnmounted(() => {
         </div>
         <div class="col-md-8">
             <h3 class="mb-4 text-primary"><i class="bi bi-list-task me-2"></i>Мои заявки</h3>
-            <div class="list-group shadow-sm rounded-3 overflow-hidden">
+            <div class="list-group shadow-sm rounded-3 scrollable-tickets">
                 <div v-if="tickets.length === 0" class="list-group-item text-center py-5 text-muted">
                     <i class="bi bi-inbox display-4 mb-3 d-block"></i>
                     У вас пока нет заявок
@@ -307,9 +329,17 @@ onUnmounted(() => {
                 <div v-for="ticket in tickets" :key="ticket.id" class="list-group-item p-4 border-start-0 border-end-0">
                     <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                         <h5 class="mb-1 fw-bold text-dark">{{ ticket.title }}</h5>
-                        <span :class="getStatusBadgeClass(ticket.status)">{{ getStatusText(ticket.status) }}</span>
+                        <div class="d-flex align-items-center">
+                            <span :class="getStatusBadgeClass(ticket.status)" class="me-2">{{ getStatusText(ticket.status) }}</span>
+                            <button class="btn btn-sm btn-link text-danger p-0" style="opacity: 0.6;" @click="hideTicket(ticket.id)" title="Удалить из списка (временно)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     <p class="mb-2 text-secondary">{{ ticket.description }}</p>
+                     <div v-if="ticket.status === 'WAITING_FOR_PARTS' && ticket.parts_wait_reason" class="alert alert-info py-2 px-3 mb-2 small">
+                        <strong><i class="bi bi-info-circle me-1"></i>Статус запчастей:</strong> {{ ticket.parts_wait_reason }}
+                    </div>
                     <div class="d-flex align-items-center text-muted small mb-3">
                         <span class="me-3"><i class="bi bi-building me-1"></i>{{ ticket.building }}</span>
                         <span class="me-3"><i class="bi bi-door-open me-1"></i>{{ ticket.room }}</span>
@@ -326,10 +356,28 @@ onUnmounted(() => {
                         <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Исполнитель: <strong>{{ ticket.assigned_to_username }}</strong></small>
                     </div>
 
+                    <!-- Assistants list -->
+                    <div v-if="ticket.assistants_details && ticket.assistants_details.length > 0" class="mb-2">
+                        <small class="text-muted"><i class="bi bi-people me-1"></i>Помощники: </small>
+                        <span v-for="asst in ticket.assistants_details" :key="asst.id" class="badge bg-light text-dark border me-1">
+                            {{ asst.full_name || asst.username }}
+                        </span>
+                    </div>
+
+                    <!-- NEW: Cancel Button -->
+                    <div v-if="['NEW', 'IN_PROGRESS', 'WAITING_FOR_PARTS'].includes(ticket.status)" class="mt-2">
+                        <button class="btn btn-sm btn-outline-danger" @click="cancelTicket(ticket.id)">
+                            <i class="bi bi-x-circle me-1"></i>Отменить заявку
+                        </button>
+                    </div>
+
                     <!-- NEW: Closed & Feedback Logic -->
-                    <div v-if="ticket.status === 'CLOSED'" class="mt-3">
-                        <div class="p-3 bg-success bg-opacity-10 rounded border border-success border-opacity-10 mb-2">
-                            <h6 class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Заявка закрыта</h6>
+                    <div v-if="['CLOSED', 'UNFIXABLE'].includes(ticket.status)" class="mt-3">
+                        <div :class="ticket.status === 'CLOSED' ? 'bg-success bg-opacity-10 border-success' : 'bg-danger bg-opacity-10 border-danger'" class="p-3 rounded border border-opacity-10 mb-2">
+                            <h6 :class="ticket.status === 'CLOSED' ? 'text-success' : 'text-danger'" class="fw-bold mb-1">
+                                <i :class="ticket.status === 'CLOSED' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'" class="bi me-2"></i>
+                                {{ ticket.status === 'CLOSED' ? 'Заявка закрыта' : 'Заявка неисправима' }}
+                            </h6>
                             <small class="text-muted" v-if="ticket.completed_at">
                                 Завершена: {{ formatDate(ticket.completed_at) }}
                             </small>
@@ -347,24 +395,33 @@ onUnmounted(() => {
                             </div>
                         </div>
 
-                        <!-- Feedback Section -->
-                        <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
-                             <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
-                             <div class="d-flex align-items-center mb-1">
-                                 <span class="text-warning me-2 fs-5">
-                                     {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
-                                 </span>
-                                 <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
-                             </div>
-                             <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
-                                 "{{ ticket.feedback.comment }}"
-                             </p>
-                        </div>
-                        <div v-else class="text-center">
-                            <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
-                                <i class="bi bi-star me-2"></i>Оценить работу
-                            </button>
-                        </div>
+                        <!-- Feedback Section (Only for CLOSED) -->
+                        <template v-if="ticket.status === 'CLOSED'">
+                            <div v-if="ticket.feedback" class="p-3 bg-light rounded border">
+                                 <h6 class="fw-bold text-muted mb-2"><i class="bi bi-star-fill text-warning me-2"></i>Ваш отзыв</h6>
+                                 <div class="d-flex align-items-center mb-1">
+                                     <span class="text-warning me-2 fs-5">
+                                         {{ '★'.repeat(ticket.feedback.rating) }}{{ '☆'.repeat(5 - ticket.feedback.rating) }}
+                                     </span>
+                                     <span class="fw-bold">{{ ticket.feedback.rating }}/5</span>
+                                 </div>
+                                 <p v-if="ticket.feedback.comment" class="mb-0 text-secondary small fst-italic">
+                                     "{{ ticket.feedback.comment }}"
+                                 </p>
+                            </div>
+                            <div v-else class="text-center">
+                                <button class="btn btn-outline-warning w-100 py-2 border-2 fw-bold" @click="confirmTicket(ticket.id)">
+                                    <i class="bi bi-star me-2"></i>Оценить работу
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- NEW: Canceled Section -->
+                    <div v-if="ticket.status === 'CANCELED'" class="mt-3">
+                         <div class="p-3 bg-dark bg-opacity-10 rounded border border-dark border-opacity-10 mb-2">
+                            <h6 class="text-dark fw-bold mb-1"><i class="bi bi-x-circle me-2"></i>Заявка отменена</h6>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -409,6 +466,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.scrollable-tickets {
+    height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .upload-zone {
     border: 2px dashed #dee2e6;
     border-radius: 8px;
