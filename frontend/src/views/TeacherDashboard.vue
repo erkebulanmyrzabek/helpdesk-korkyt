@@ -154,6 +154,18 @@ const cancelTicket = async (id) => {
     }
 }
 
+const markPartsReady = async (id) => {
+    const confirmed = confirm('Өтініш маманға қайта жүктеледі. Қосалқы бөлшектің келгеніне сенімдісіз бе?')
+    if (!confirmed) return
+
+    try {
+        await axios.post(`tickets/${id}/parts-ready/`)
+        fetchTickets()
+    } catch (error) {
+        alert(error.response?.data?.error || 'Ошибка при обновлении статуса заявки')
+    }
+}
+
 const hideTicket = async (id) => {
     if (!confirm('Удалить из списка? (Заявка вернется при обновлении)')) return
     try {
@@ -365,9 +377,12 @@ onUnmounted(() => {
                     </div>
 
                     <!-- NEW: Cancel Button -->
-                    <div v-if="['NEW', 'IN_PROGRESS', 'WAITING_FOR_PARTS'].includes(ticket.status)" class="mt-2">
+                    <div v-if="['NEW', 'IN_PROGRESS', 'WAITING_FOR_PARTS'].includes(ticket.status)" class="mt-2 d-flex gap-2 flex-wrap">
                         <button class="btn btn-sm btn-outline-danger" @click="cancelTicket(ticket.id)">
                             <i class="bi bi-x-circle me-1"></i>Отменить заявку
+                        </button>
+                        <button v-if="ticket.status === 'WAITING_FOR_PARTS'" class="btn btn-sm btn-primary" @click="markPartsReady(ticket.id)">
+                            <i class="bi bi-tools me-1"></i>Запасная часть готова
                         </button>
                     </div>
 

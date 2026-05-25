@@ -22,6 +22,7 @@ const assistantModal = ref({
 })
 
 const currentTime = ref(new Date())
+let refreshIntervalId = null
 
 const selectedAuthor = ref(null)
 const isLoadingAuthor = ref(false)
@@ -58,10 +59,22 @@ const fetchHelpdeskUsers = async () => {
 const openTickets = computed(() => tickets.value.filter(t => t.status === 'NEW'))
 const myTickets = computed(() => {
     if (!authStore.user) return []
-    return tickets.value.filter(t => 
-        (t.assigned_to === authStore.user.id || (t.assistants && t.assistants.includes(authStore.user.id))) && 
-        (t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS')
-    )
+    const statusPriority = {
+        IN_PROGRESS: 0,
+        WAITING_FOR_PARTS: 1
+    }
+
+    return tickets.value
+        .filter(t =>
+            (t.assigned_to === authStore.user.id || (t.assistants && t.assistants.includes(authStore.user.id))) &&
+            (t.status === 'IN_PROGRESS' || t.status === 'WAITING_FOR_PARTS')
+        )
+        .sort((a, b) => {
+            const priorityDiff = (statusPriority[a.status] ?? 99) - (statusPriority[b.status] ?? 99)
+            if (priorityDiff !== 0) return priorityDiff
+
+            return new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
+        })
 })
 const completedTickets = computed(() => {
     if (!authStore.user) return []
@@ -240,6 +253,14 @@ const closeAuthorModal = () => {
 onMounted(() => {
     fetchTickets()
     fetchOffers()
+    refreshIntervalId = setInterval(() => {
+        fetchTickets()
+        fetchOffers()
+    }, 15000)
+})
+
+onUnmounted(() => {
+    if (refreshIntervalId) clearInterval(refreshIntervalId)
 })
 
 
@@ -320,7 +341,7 @@ onMounted(() => {
                                 <button v-if="ticket.assigned_to === authStore.user.id && (!ticket.assistants_details || ticket.assistants_details.length === 0) && (!ticket.pending_offers || ticket.pending_offers.length === 0)" class="btn btn-sm btn-outline-primary" @click="openAssistantModal(ticket.id)">
                                     ➕ Добавить помощника
                                 </button>
-                                <button class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
+                                <button v-if="ticket.status === 'IN_PROGRESS'" class="btn btn-sm btn-success" @click="reportData.id = ticket.id">
                                     Завершить
                                 </button>
                             </div>
@@ -346,7 +367,7 @@ onMounted(() => {
                             </div>
 
                             <!-- Finish Form -->
-                            <div v-if="reportData.id === ticket.id" class="mt-2 text-start p-2 bg-light rounded border border-success">
+                            <div v-if="reportData.id === ticket.id && ticket.status === 'IN_PROGRESS'" class="mt-2 text-start p-2 bg-light rounded border border-success">
                                 <div class="form-text small mb-1">Фото (по желанию):</div>
                                 <input type="file" @change="handleReportImage" class="form-control form-control-sm mb-1" accept="image/*">
                                 <textarea v-model="reportData.comment" class="form-control form-control-sm mb-1" placeholder="Комментарий к выполнению (необязательно)"></textarea>
