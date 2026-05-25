@@ -165,6 +165,9 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket = self.get_object()
         if ticket.assigned_to != request.user:
              return Response({'error': 'Вы не исполнитель этой заявки'}, status=status.HTTP_403_FORBIDDEN)
+
+        if ticket.status != 'IN_PROGRESS':
+            return Response({'error': 'Заявку можно завершить только со статусом "В работе"'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Check for media_after (Optional)
         if 'media_after' in request.FILES:
@@ -198,6 +201,21 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.status = 'CANCELED'
         ticket.save()
         
+        return Response(TicketSerializer(ticket, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsTeacher], url_path='parts-ready')
+    def parts_ready(self, request, pk=None):
+        ticket = self.get_object()
+
+        if ticket.author != request.user:
+            return Response({'error': 'Вы не автор этой заявки'}, status=status.HTTP_403_FORBIDDEN)
+
+        if ticket.status != 'WAITING_FOR_PARTS':
+            return Response({'error': 'Заявка не находится в статусе ожидания запчастей'}, status=status.HTTP_400_BAD_REQUEST)
+
+        ticket.status = 'IN_PROGRESS'
+        ticket.save()
+
         return Response(TicketSerializer(ticket, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsTeacher])
